@@ -6,9 +6,7 @@ import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 type alias Button =
-    { disabled : Bool
-    , readonly : Bool
-    , kind : ColorSetting
+    { kind : ColorSetting
     , size : Size
     , text : Color
     }
@@ -16,9 +14,7 @@ type alias Button =
 
 defaultButton : Button
 defaultButton =
-    { disabled = False
-    , readonly = False
-    , kind = Primary
+    { kind = Primary
     , size = Medium
     , text = hex "#FFF"
     }

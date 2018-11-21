@@ -7434,9 +7434,7 @@ var rtfeldman$elm_css$Css$hex = function (str) {
 	return rtfeldman$elm_css$Css$erroneousHex(str);
 };
 var author$project$Button$defaultButton = {
-	disabled: false,
 	kind: author$project$Theme$Primary,
-	readonly: false,
 	size: author$project$Theme$Medium,
 	text: rtfeldman$elm_css$Css$hex('#FFF')
 };

@@ -23,6 +23,7 @@ type alias Theme =
     , success : Color
     , warning : Color
     , danger : Color
+    , font : List String
     }
 
 
@@ -33,4 +34,5 @@ defaultTheme =
     , success = hex "#4DC151"
     , warning = hex "#FF9730"
     , danger = hex "#E04141"
+    , font = [ "-apple-system", "system-ui", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif" ]
     }

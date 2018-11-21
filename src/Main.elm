@@ -5,6 +5,7 @@ import Button exposing (button, defaultButton)
 import Html
 import Html.Styled exposing (Html, nav, text, toUnstyled)
 import Html.Styled.Events exposing (onClick)
+import Input exposing (defaultInput, input)
 import Theme exposing (Size(..), defaultTheme)
 
 
@@ -26,6 +27,7 @@ view : Model -> Html Msg
 view model =
     nav []
         [ button defaultTheme { defaultButton | size = Large } [ onClick DoSomething ] [ text "Click me!" ]
+        , input defaultTheme defaultInput [] []
         ]
 
 

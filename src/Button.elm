@@ -1,6 +1,6 @@
 module Button exposing (Button, button, defaultButton)
 
-import Css exposing (Color, backgroundColor, borderRadius, color, fontSize, height, hex, padding2, px)
+import Css exposing (Color, backgroundColor, borderRadius, color, fontFamilies, fontSize, height, hex, padding2, px)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
 import Theme exposing (ColorSetting(..), Size(..), Theme)
 
@@ -60,4 +60,5 @@ button theme model =
         , padding2 (px 0) p
         , height h
         , fontSize fs
+        , fontFamilies theme.font
         ]

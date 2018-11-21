@@ -2,37 +2,45 @@ module Main exposing (main)
 
 import Browser
 import Button exposing (button, defaultButton)
+import Checkbox exposing (checkbox, defaultCheckbox)
 import Html
 import Html.Styled exposing (Html, nav, text, toUnstyled)
-import Html.Styled.Events exposing (onClick)
+import Html.Styled.Attributes exposing (placeholder, value)
+import Html.Styled.Events exposing (onClick, onInput)
 import Input exposing (defaultInput, input)
 import Theme exposing (Size(..), defaultTheme)
 
 
 type Msg
     = NoOp
-    | DoSomething
+    | Click
+    | Input String
 
 
 type alias Model =
-    {}
+    { input : String
+    }
 
 
 initialModel : Model
 initialModel =
-    {}
+    { input = "" }
 
 
 view : Model -> Html Msg
 view model =
     nav []
-        [ button defaultTheme { defaultButton | size = Large } [ onClick DoSomething ] [ text "Click me!" ]
-        , input defaultTheme defaultInput [] []
+        [ button defaultTheme { defaultButton | size = Large } [ onClick Click ] [ text "Click me!" ]
+        , input defaultTheme defaultInput [ onInput Input, value model.input, placeholder "Input things" ] []
+        , checkbox defaultTheme defaultCheckbox [] []
         ]
 
 
 update msg model =
     case msg of
+        Input val ->
+            { model | input = val }
+
         _ ->
             model
 

@@ -9,6 +9,7 @@ import Html.Styled.Attributes exposing (placeholder, value)
 import Html.Styled.Events exposing (onClick, onInput)
 import Input exposing (defaultInput, input)
 import Theme exposing (Size(..), defaultTheme)
+import Toast exposing (Position(..), defaultToast, toast)
 
 
 type Msg
@@ -46,9 +47,14 @@ view model =
             []
         , checkbox
             defaultTheme
-            { defaultCheckbox | size = Large, checked = model.checked }
+            { defaultCheckbox | size = Medium, checked = model.checked }
             [ onClick Check ]
             []
+        , toast
+            defaultTheme
+            { defaultToast | position = BottomLeft }
+            []
+            [ text "Notify things!" ]
         ]
 
 

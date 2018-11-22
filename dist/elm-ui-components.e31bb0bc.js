@@ -7975,9 +7975,7 @@ var rtfeldman$elm_css$VirtualDom$Styled$attribute = F2(
 			'');
 	});
 var rtfeldman$elm_css$Svg$Styled$Attributes$d = rtfeldman$elm_css$VirtualDom$Styled$attribute('d');
-var rtfeldman$elm_css$Svg$Styled$Attributes$height = rtfeldman$elm_css$VirtualDom$Styled$attribute('height');
 var rtfeldman$elm_css$Svg$Styled$Attributes$viewBox = rtfeldman$elm_css$VirtualDom$Styled$attribute('viewBox');
-var rtfeldman$elm_css$Svg$Styled$Attributes$width = rtfeldman$elm_css$VirtualDom$Styled$attribute('width');
 var author$project$Checkbox$checkbox = F4(
 	function (theme, model, attr, inner) {
 		var checkboxColor = function () {
@@ -8109,10 +8107,6 @@ var author$project$Checkbox$checkbox = F4(
 					rtfeldman$elm_css$Svg$Styled$svg,
 					_List_fromArray(
 						[
-							rtfeldman$elm_css$Svg$Styled$Attributes$width(
-							elm$core$String$fromInt(checkBoxSize)),
-							rtfeldman$elm_css$Svg$Styled$Attributes$height(
-							elm$core$String$fromInt(checkBoxSize)),
 							rtfeldman$elm_css$Svg$Styled$Attributes$viewBox(
 							'0 0 ' + (elm$core$String$fromInt(checkBoxSize) + (' ' + elm$core$String$fromInt(checkBoxSize)))),
 							rtfeldman$elm_css$Svg$Styled$Attributes$css(
@@ -8217,6 +8211,157 @@ var author$project$Theme$defaultTheme = {
 	success: rtfeldman$elm_css$Css$hex('#4DC151'),
 	warning: rtfeldman$elm_css$Css$hex('#FF9730')
 };
+var author$project$Toast$BottomLeft = {$: 'BottomLeft'};
+var author$project$Toast$Bottom = {$: 'Bottom'};
+var author$project$Toast$defaultToast = {
+	kind: author$project$Theme$Primary,
+	position: author$project$Toast$Bottom,
+	size: author$project$Theme$Medium,
+	text: rtfeldman$elm_css$Css$hex('#FFF'),
+	width: 100,
+	z: 1
+};
+var rtfeldman$elm_css$Css$absolute = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
+var rtfeldman$elm_css$Css$bottom = rtfeldman$elm_css$Css$prop1('bottom');
+var rtfeldman$elm_css$Css$row = {flexDirection: rtfeldman$elm_css$Css$Structure$Compatible, flexDirectionOrWrap: rtfeldman$elm_css$Css$Structure$Compatible, value: 'row'};
+var rtfeldman$elm_css$Css$column = _Utils_update(
+	rtfeldman$elm_css$Css$row,
+	{value: 'column'});
+var rtfeldman$elm_css$Css$flexDirection = rtfeldman$elm_css$Css$prop1('flex-direction');
+var rtfeldman$elm_css$Css$left = rtfeldman$elm_css$Css$prop1('left');
+var rtfeldman$elm_css$Css$margin = rtfeldman$elm_css$Css$prop1('margin');
+var rtfeldman$elm_css$Css$position = rtfeldman$elm_css$Css$prop1('position');
+var rtfeldman$elm_css$Css$right = rtfeldman$elm_css$Css$prop1('right');
+var rtfeldman$elm_css$Css$textAlign = function (fn) {
+	return A3(
+		rtfeldman$elm_css$Css$Internal$getOverloadedProperty,
+		'textAlign',
+		'text-align',
+		fn(rtfeldman$elm_css$Css$Internal$lengthForOverloadedProperty));
+};
+var rtfeldman$elm_css$Css$top = rtfeldman$elm_css$Css$prop1('top');
+var rtfeldman$elm_css$Css$transform = function (only) {
+	return rtfeldman$elm_css$Css$transforms(
+		_List_fromArray(
+			[only]));
+};
+var rtfeldman$elm_css$Css$zIndex = rtfeldman$elm_css$Css$prop1('z-index');
+var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div');
+var author$project$Toast$toast = F2(
+	function (theme, model) {
+		var p = function () {
+			var _n1 = model.position;
+			switch (_n1.$) {
+				case 'Top':
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$left(
+							rtfeldman$elm_css$Css$pct(50)),
+							rtfeldman$elm_css$Css$transform(
+							rtfeldman$elm_css$Css$translateX(
+								rtfeldman$elm_css$Css$pct(-50)))
+						]);
+				case 'Left':
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$top(
+							rtfeldman$elm_css$Css$pct(50)),
+							rtfeldman$elm_css$Css$transform(
+							rtfeldman$elm_css$Css$translateY(
+								rtfeldman$elm_css$Css$pct(-50)))
+						]);
+				case 'Bottom':
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$left(
+							rtfeldman$elm_css$Css$pct(50)),
+							rtfeldman$elm_css$Css$transform(
+							rtfeldman$elm_css$Css$translateX(
+								rtfeldman$elm_css$Css$pct(-50)))
+						]);
+				case 'Right':
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$top(
+							rtfeldman$elm_css$Css$pct(50)),
+							rtfeldman$elm_css$Css$transform(
+							rtfeldman$elm_css$Css$translateY(
+								rtfeldman$elm_css$Css$pct(-50)))
+						]);
+				case 'TopLeft':
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+						]);
+				case 'TopRight':
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero)
+						]);
+				case 'BottomLeft':
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+						]);
+				default:
+					return _List_fromArray(
+						[
+							rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
+							rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero)
+						]);
+			}
+		}();
+		var bg = function () {
+			var _n0 = model.kind;
+			switch (_n0.$) {
+				case 'Primary':
+					return theme.primary;
+				case 'Secondary':
+					return theme.secondary;
+				case 'Warning':
+					return theme.warning;
+				case 'Success':
+					return theme.success;
+				default:
+					return theme.danger;
+			}
+		}();
+		return A2(
+			rtfeldman$elm_css$Html$Styled$styled,
+			rtfeldman$elm_css$Html$Styled$div,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Css$backgroundColor(bg),
+						rtfeldman$elm_css$Css$color(model.text),
+						rtfeldman$elm_css$Css$fontFamilies(theme.font),
+						rtfeldman$elm_css$Css$zIndex(
+						rtfeldman$elm_css$Css$int(model.z)),
+						rtfeldman$elm_css$Css$textAlign(rtfeldman$elm_css$Css$center),
+						rtfeldman$elm_css$Css$borderRadius(
+						rtfeldman$elm_css$Css$px(2)),
+						rtfeldman$elm_css$Css$padding(
+						rtfeldman$elm_css$Css$px(4)),
+						rtfeldman$elm_css$Css$height(
+						rtfeldman$elm_css$Css$px(68)),
+						rtfeldman$elm_css$Css$width(
+						rtfeldman$elm_css$Css$px(model.width)),
+						rtfeldman$elm_css$Css$displayFlex,
+						rtfeldman$elm_css$Css$flexDirection(rtfeldman$elm_css$Css$column),
+						rtfeldman$elm_css$Css$justifyContent(rtfeldman$elm_css$Css$center),
+						rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$absolute),
+						rtfeldman$elm_css$Css$margin(
+						rtfeldman$elm_css$Css$px(10))
+					]),
+				p));
+	});
 var rtfeldman$elm_css$Html$Styled$nav = rtfeldman$elm_css$Html$Styled$node('nav');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
@@ -8338,12 +8483,23 @@ var author$project$Main$view = function (model) {
 				author$project$Theme$defaultTheme,
 				_Utils_update(
 					author$project$Checkbox$defaultCheckbox,
-					{checked: model.checked, size: author$project$Theme$Large}),
+					{checked: model.checked, size: author$project$Theme$Medium}),
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$Events$onClick(author$project$Main$Check)
 					]),
-				_List_Nil)
+				_List_Nil),
+				A4(
+				author$project$Toast$toast,
+				author$project$Theme$defaultTheme,
+				_Utils_update(
+					author$project$Toast$defaultToast,
+					{position: author$project$Toast$BottomLeft}),
+				_List_Nil,
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Html$Styled$text('Notify things!')
+					]))
 			]));
 };
 var elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -9105,7 +9261,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65159" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64492" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

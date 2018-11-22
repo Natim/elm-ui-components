@@ -114,9 +114,7 @@ checkbox theme model attr inner =
     in
     cb attr
         [ svg
-            [ Svg.width (String.fromInt checkBoxSize)
-            , Svg.height (String.fromInt checkBoxSize)
-            , Svg.viewBox ("0 0 " ++ String.fromInt checkBoxSize ++ " " ++ String.fromInt checkBoxSize)
+            [ Svg.viewBox ("0 0 " ++ String.fromInt checkBoxSize ++ " " ++ String.fromInt checkBoxSize)
             , Svg.css
                 [ opacity (int 1)
                 , fill checkboxColor

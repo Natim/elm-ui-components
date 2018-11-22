@@ -15,24 +15,40 @@ type Msg
     = NoOp
     | Click
     | Input String
+    | Check
 
 
 type alias Model =
     { input : String
+    , checked : Bool
     }
 
 
 initialModel : Model
 initialModel =
-    { input = "" }
+    { input = ""
+    , checked = False
+    }
 
 
 view : Model -> Html Msg
 view model =
     nav []
-        [ button defaultTheme { defaultButton | size = Large } [ onClick Click ] [ text "Click me!" ]
-        , input defaultTheme defaultInput [ onInput Input, value model.input, placeholder "Input things" ] []
-        , checkbox defaultTheme defaultCheckbox [] []
+        [ button
+            defaultTheme
+            { defaultButton | size = Large }
+            [ onClick Click ]
+            [ text "Click me!" ]
+        , input
+            defaultTheme
+            defaultInput
+            [ onInput Input, value model.input, placeholder "Input things" ]
+            []
+        , checkbox
+            defaultTheme
+            { defaultCheckbox | size = Large, checked = model.checked }
+            [ onClick Check ]
+            []
         ]
 
 
@@ -40,6 +56,9 @@ update msg model =
     case msg of
         Input val ->
             { model | input = val }
+
+        Check ->
+            { model | checked = not model.checked }
 
         _ ->
             model

@@ -52,7 +52,11 @@ view model =
             []
         , toast
             defaultTheme
-            { defaultToast | position = BottomLeft }
+            { defaultToast
+                | position = TopRight
+                , transitionDirection = TopRight
+                , visible = model.checked
+            }
             []
             [ text "Notify things!" ]
         ]

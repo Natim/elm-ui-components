@@ -8211,13 +8211,15 @@ var author$project$Theme$defaultTheme = {
 	success: rtfeldman$elm_css$Css$hex('#4DC151'),
 	warning: rtfeldman$elm_css$Css$hex('#FF9730')
 };
-var author$project$Toast$BottomLeft = {$: 'BottomLeft'};
+var author$project$Toast$TopRight = {$: 'TopRight'};
 var author$project$Toast$Bottom = {$: 'Bottom'};
 var author$project$Toast$defaultToast = {
 	kind: author$project$Theme$Primary,
 	position: author$project$Toast$Bottom,
 	size: author$project$Theme$Medium,
 	text: rtfeldman$elm_css$Css$hex('#FFF'),
+	transitionDirection: author$project$Toast$Bottom,
+	visible: false,
 	width: 100,
 	z: 1
 };
@@ -8246,76 +8248,238 @@ var rtfeldman$elm_css$Css$transform = function (only) {
 			[only]));
 };
 var rtfeldman$elm_css$Css$zIndex = rtfeldman$elm_css$Css$prop1('z-index');
+var rtfeldman$elm_css$Css$Transitions$Bottom = {$: 'Bottom'};
+var rtfeldman$elm_css$Css$Transitions$bottom3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Bottom);
+var rtfeldman$elm_css$Css$Transitions$EaseIn = {$: 'EaseIn'};
+var rtfeldman$elm_css$Css$Transitions$easeIn = rtfeldman$elm_css$Css$Transitions$EaseIn;
+var rtfeldman$elm_css$Css$Transitions$Left = {$: 'Left'};
+var rtfeldman$elm_css$Css$Transitions$left3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Left);
+var rtfeldman$elm_css$Css$Transitions$Right = {$: 'Right'};
+var rtfeldman$elm_css$Css$Transitions$right3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Right);
+var rtfeldman$elm_css$Css$Transitions$Top = {$: 'Top'};
+var rtfeldman$elm_css$Css$Transitions$top3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Top);
 var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div');
 var author$project$Toast$toast = F2(
 	function (theme, model) {
-		var p = function () {
-			var _n1 = model.position;
-			switch (_n1.$) {
+		var tr = function () {
+			var _n3 = model.transitionDirection;
+			switch (_n3.$) {
 				case 'Top':
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$left(
-							rtfeldman$elm_css$Css$pct(50)),
-							rtfeldman$elm_css$Css$transform(
-							rtfeldman$elm_css$Css$translateX(
-								rtfeldman$elm_css$Css$pct(-50)))
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
 				case 'Left':
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$top(
-							rtfeldman$elm_css$Css$pct(50)),
-							rtfeldman$elm_css$Css$transform(
-							rtfeldman$elm_css$Css$translateY(
-								rtfeldman$elm_css$Css$pct(-50)))
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
 				case 'Bottom':
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$left(
-							rtfeldman$elm_css$Css$pct(50)),
-							rtfeldman$elm_css$Css$transform(
-							rtfeldman$elm_css$Css$translateX(
-								rtfeldman$elm_css$Css$pct(-50)))
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
 				case 'Right':
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$top(
-							rtfeldman$elm_css$Css$pct(50)),
-							rtfeldman$elm_css$Css$transform(
-							rtfeldman$elm_css$Css$translateY(
-								rtfeldman$elm_css$Css$pct(-50)))
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
 				case 'TopLeft':
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
+									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
 				case 'TopRight':
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero)
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
+									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
 				case 'BottomLeft':
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
+									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
 				default:
 					return _List_fromArray(
 						[
-							rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
-							rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero)
+							rtfeldman$elm_css$Css$Transitions$transition(
+							_List_fromArray(
+								[
+									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
+									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+								]))
 						]);
+			}
+		}();
+		var offset = rtfeldman$elm_css$Css$px(-300);
+		var p = function () {
+			if (model.visible) {
+				var _n1 = model.position;
+				switch (_n1.$) {
+					case 'Top':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$left(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateX(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'Left':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$top(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateY(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'Bottom':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$left(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateX(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'Right':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$top(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateY(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'TopLeft':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+							]);
+					case 'TopRight':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero)
+							]);
+					case 'BottomLeft':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+							]);
+					default:
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$bottom(rtfeldman$elm_css$Css$zero),
+								rtfeldman$elm_css$Css$right(rtfeldman$elm_css$Css$zero)
+							]);
+				}
+			} else {
+				var _n2 = model.position;
+				switch (_n2.$) {
+					case 'Top':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$top(offset),
+								rtfeldman$elm_css$Css$left(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateX(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'Left':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$left(offset),
+								rtfeldman$elm_css$Css$top(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateY(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'Bottom':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$bottom(offset),
+								rtfeldman$elm_css$Css$left(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateX(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'Right':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$right(offset),
+								rtfeldman$elm_css$Css$top(
+								rtfeldman$elm_css$Css$pct(50)),
+								rtfeldman$elm_css$Css$transform(
+								rtfeldman$elm_css$Css$translateY(
+									rtfeldman$elm_css$Css$pct(-50)))
+							]);
+					case 'TopLeft':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$top(offset),
+								rtfeldman$elm_css$Css$left(offset)
+							]);
+					case 'TopRight':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$top(offset),
+								rtfeldman$elm_css$Css$right(offset)
+							]);
+					case 'BottomLeft':
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$bottom(offset),
+								rtfeldman$elm_css$Css$left(offset)
+							]);
+					default:
+						return _List_fromArray(
+							[
+								rtfeldman$elm_css$Css$bottom(offset),
+								rtfeldman$elm_css$Css$right(offset)
+							]);
+				}
 			}
 		}();
 		var bg = function () {
@@ -8360,7 +8524,7 @@ var author$project$Toast$toast = F2(
 						rtfeldman$elm_css$Css$margin(
 						rtfeldman$elm_css$Css$px(10))
 					]),
-				p));
+				_Utils_ap(p, tr)));
 	});
 var rtfeldman$elm_css$Html$Styled$nav = rtfeldman$elm_css$Html$Styled$node('nav');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -8494,7 +8658,7 @@ var author$project$Main$view = function (model) {
 				author$project$Theme$defaultTheme,
 				_Utils_update(
 					author$project$Toast$defaultToast,
-					{position: author$project$Toast$BottomLeft}),
+					{position: author$project$Toast$TopRight, transitionDirection: author$project$Toast$TopRight, visible: model.checked}),
 				_List_Nil,
 				_List_fromArray(
 					[
@@ -9261,7 +9425,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64492" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62920" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

@@ -8220,11 +8220,22 @@ var author$project$Toast$defaultToast = {
 	text: rtfeldman$elm_css$Css$hex('#FFF'),
 	transitionDirection: author$project$Toast$Bottom,
 	visible: false,
-	width: 100,
 	z: 1
 };
 var rtfeldman$elm_css$Css$absolute = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
 var rtfeldman$elm_css$Css$bottom = rtfeldman$elm_css$Css$prop1('bottom');
+var rtfeldman$elm_css$Css$prop5 = F6(
+	function (key, argA, argB, argC, argD, argE) {
+		return A2(
+			rtfeldman$elm_css$Css$property,
+			key,
+			A2(
+				elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[argA.value, argB.value, argC.value, argD.value, argE.value])));
+	});
+var rtfeldman$elm_css$Css$boxShadow5 = rtfeldman$elm_css$Css$prop5('box-shadow');
 var rtfeldman$elm_css$Css$row = {flexDirection: rtfeldman$elm_css$Css$Structure$Compatible, flexDirectionOrWrap: rtfeldman$elm_css$Css$Structure$Compatible, value: 'row'};
 var rtfeldman$elm_css$Css$column = _Utils_update(
 	rtfeldman$elm_css$Css$row,
@@ -8250,8 +8261,8 @@ var rtfeldman$elm_css$Css$transform = function (only) {
 var rtfeldman$elm_css$Css$zIndex = rtfeldman$elm_css$Css$prop1('z-index');
 var rtfeldman$elm_css$Css$Transitions$Bottom = {$: 'Bottom'};
 var rtfeldman$elm_css$Css$Transitions$bottom3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Bottom);
-var rtfeldman$elm_css$Css$Transitions$EaseIn = {$: 'EaseIn'};
-var rtfeldman$elm_css$Css$Transitions$easeIn = rtfeldman$elm_css$Css$Transitions$EaseIn;
+var rtfeldman$elm_css$Css$Transitions$EaseInOut = {$: 'EaseInOut'};
+var rtfeldman$elm_css$Css$Transitions$easeInOut = rtfeldman$elm_css$Css$Transitions$EaseInOut;
 var rtfeldman$elm_css$Css$Transitions$Left = {$: 'Left'};
 var rtfeldman$elm_css$Css$Transitions$left3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Left);
 var rtfeldman$elm_css$Css$Transitions$Right = {$: 'Right'};
@@ -8262,15 +8273,15 @@ var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div'
 var author$project$Toast$toast = F2(
 	function (theme, model) {
 		var tr = function () {
-			var _n3 = model.transitionDirection;
-			switch (_n3.$) {
+			var _n5 = model.transitionDirection;
+			switch (_n5.$) {
 				case 'Top':
 					return _List_fromArray(
 						[
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 				case 'Left':
@@ -8279,7 +8290,7 @@ var author$project$Toast$toast = F2(
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 				case 'Bottom':
@@ -8288,7 +8299,7 @@ var author$project$Toast$toast = F2(
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 				case 'Right':
@@ -8297,7 +8308,7 @@ var author$project$Toast$toast = F2(
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 				case 'TopLeft':
@@ -8306,8 +8317,8 @@ var author$project$Toast$toast = F2(
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
-									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut),
+									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 				case 'TopRight':
@@ -8316,8 +8327,8 @@ var author$project$Toast$toast = F2(
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
-									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut),
+									A3(rtfeldman$elm_css$Css$Transitions$top3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 				case 'BottomLeft':
@@ -8326,8 +8337,8 @@ var author$project$Toast$toast = F2(
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
-									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut),
+									A3(rtfeldman$elm_css$Css$Transitions$left3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 				default:
@@ -8336,8 +8347,8 @@ var author$project$Toast$toast = F2(
 							rtfeldman$elm_css$Css$Transitions$transition(
 							_List_fromArray(
 								[
-									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn),
-									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeIn)
+									A3(rtfeldman$elm_css$Css$Transitions$right3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut),
+									A3(rtfeldman$elm_css$Css$Transitions$bottom3, 400, 0, rtfeldman$elm_css$Css$Transitions$easeInOut)
 								]))
 						]);
 			}
@@ -8345,8 +8356,8 @@ var author$project$Toast$toast = F2(
 		var offset = rtfeldman$elm_css$Css$px(-300);
 		var p = function () {
 			if (model.visible) {
-				var _n1 = model.position;
-				switch (_n1.$) {
+				var _n3 = model.position;
+				switch (_n3.$) {
 					case 'Top':
 						return _List_fromArray(
 							[
@@ -8413,8 +8424,8 @@ var author$project$Toast$toast = F2(
 							]);
 				}
 			} else {
-				var _n2 = model.position;
-				switch (_n2.$) {
+				var _n4 = model.position;
+				switch (_n4.$) {
 					case 'Top':
 						return _List_fromArray(
 							[
@@ -8483,8 +8494,8 @@ var author$project$Toast$toast = F2(
 			}
 		}();
 		var bg = function () {
-			var _n0 = model.kind;
-			switch (_n0.$) {
+			var _n2 = model.kind;
+			switch (_n2.$) {
 				case 'Primary':
 					return theme.primary;
 				case 'Secondary':
@@ -8497,6 +8508,32 @@ var author$project$Toast$toast = F2(
 					return theme.danger;
 			}
 		}();
+		var shadow = A5(
+			rtfeldman$elm_css$Css$boxShadow5,
+			rtfeldman$elm_css$Css$zero,
+			rtfeldman$elm_css$Css$zero,
+			rtfeldman$elm_css$Css$px(4),
+			rtfeldman$elm_css$Css$px(1),
+			bg);
+		var _n0 = function () {
+			var _n1 = model.size;
+			switch (_n1.$) {
+				case 'Small':
+					return _Utils_Tuple2(
+						rtfeldman$elm_css$Css$px(12),
+						rtfeldman$elm_css$Css$px(26));
+				case 'Medium':
+					return _Utils_Tuple2(
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(36));
+				default:
+					return _Utils_Tuple2(
+						rtfeldman$elm_css$Css$px(22),
+						rtfeldman$elm_css$Css$px(50));
+			}
+		}();
+		var notificationFontSize = _n0.a;
+		var notificationHeight = _n0.b;
 		return A2(
 			rtfeldman$elm_css$Html$Styled$styled,
 			rtfeldman$elm_css$Html$Styled$div,
@@ -8513,16 +8550,15 @@ var author$project$Toast$toast = F2(
 						rtfeldman$elm_css$Css$px(2)),
 						rtfeldman$elm_css$Css$padding(
 						rtfeldman$elm_css$Css$px(4)),
-						rtfeldman$elm_css$Css$height(
-						rtfeldman$elm_css$Css$px(68)),
-						rtfeldman$elm_css$Css$width(
-						rtfeldman$elm_css$Css$px(model.width)),
+						rtfeldman$elm_css$Css$height(notificationHeight),
+						rtfeldman$elm_css$Css$fontSize(notificationFontSize),
 						rtfeldman$elm_css$Css$displayFlex,
 						rtfeldman$elm_css$Css$flexDirection(rtfeldman$elm_css$Css$column),
 						rtfeldman$elm_css$Css$justifyContent(rtfeldman$elm_css$Css$center),
 						rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$absolute),
 						rtfeldman$elm_css$Css$margin(
-						rtfeldman$elm_css$Css$px(10))
+						rtfeldman$elm_css$Css$px(10)),
+						shadow
 					]),
 				_Utils_ap(p, tr)));
 	});
@@ -9425,7 +9461,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62920" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54138" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

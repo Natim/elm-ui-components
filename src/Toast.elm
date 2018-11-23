@@ -1,7 +1,7 @@
 module Toast exposing (Position(..), Toast, defaultToast, toast)
 
-import Css exposing (Color, absolute, backgroundColor, borderRadius, bottom, calc, center, color, column, displayFlex, flexDirection, fontFamilies, fontSize, height, hex, int, justifyContent, left, margin, minus, padding, pct, position, px, right, textAlign, top, transform, translateX, translateY, width, zIndex, zero)
-import Css.Transitions exposing (easeIn, transition)
+import Css exposing (Color, absolute, backgroundColor, borderRadius, bottom, boxShadow5, calc, center, color, column, displayFlex, flexDirection, fontFamilies, fontSize, height, hex, int, justifyContent, left, margin, minus, padding, pct, position, px, right, textAlign, top, transform, translateX, translateY, zIndex, zero)
+import Css.Transitions exposing (easeInOut, transition)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
 import Theme exposing (ColorSetting(..), Size(..), Theme)
 
@@ -11,7 +11,6 @@ type alias Toast =
     , size : Size
     , text : Color
     , z : Int
-    , width : Float
     , position : Position
     , visible : Bool
     , transitionDirection : Position
@@ -35,7 +34,6 @@ defaultToast =
     , size = Medium
     , text = hex "#FFF"
     , z = 1
-    , width = 100
     , position = Bottom
     , visible = False
     , transitionDirection = Bottom
@@ -64,6 +62,9 @@ toast theme model =
                 Danger ->
                     theme.danger
 
+        shadow =
+            boxShadow5 zero zero (px 4) (px 1) bg
+
         offset =
             px -300
 
@@ -71,53 +72,53 @@ toast theme model =
             case model.transitionDirection of
                 Top ->
                     [ transition
-                        [ Css.Transitions.top3 400 0 easeIn
+                        [ Css.Transitions.top3 400 0 easeInOut
                         ]
                     ]
 
                 Left ->
                     [ transition
-                        [ Css.Transitions.left3 400 0 easeIn
+                        [ Css.Transitions.left3 400 0 easeInOut
                         ]
                     ]
 
                 Bottom ->
                     [ transition
-                        [ Css.Transitions.bottom3 400 0 easeIn
+                        [ Css.Transitions.bottom3 400 0 easeInOut
                         ]
                     ]
 
                 Right ->
                     [ transition
-                        [ Css.Transitions.right3 400 0 easeIn
+                        [ Css.Transitions.right3 400 0 easeInOut
                         ]
                     ]
 
                 TopLeft ->
                     [ transition
-                        [ Css.Transitions.top3 400 0 easeIn
-                        , Css.Transitions.left3 400 0 easeIn
+                        [ Css.Transitions.top3 400 0 easeInOut
+                        , Css.Transitions.left3 400 0 easeInOut
                         ]
                     ]
 
                 TopRight ->
                     [ transition
-                        [ Css.Transitions.right3 400 0 easeIn
-                        , Css.Transitions.top3 400 0 easeIn
+                        [ Css.Transitions.right3 400 0 easeInOut
+                        , Css.Transitions.top3 400 0 easeInOut
                         ]
                     ]
 
                 BottomLeft ->
                     [ transition
-                        [ Css.Transitions.bottom3 400 0 easeIn
-                        , Css.Transitions.left3 400 0 easeIn
+                        [ Css.Transitions.bottom3 400 0 easeInOut
+                        , Css.Transitions.left3 400 0 easeInOut
                         ]
                     ]
 
                 BottomRight ->
                     [ transition
-                        [ Css.Transitions.right3 400 0 easeIn
-                        , Css.Transitions.bottom3 400 0 easeIn
+                        [ Css.Transitions.right3 400 0 easeInOut
+                        , Css.Transitions.bottom3 400 0 easeInOut
                         ]
                     ]
 
@@ -213,6 +214,17 @@ toast theme model =
                         [ bottom offset
                         , right offset
                         ]
+
+        ( notificationFontSize, notificationHeight ) =
+            case model.size of
+                Small ->
+                    ( px 12, px 26 )
+
+                Medium ->
+                    ( px 16, px 36 )
+
+                Large ->
+                    ( px 22, px 50 )
     in
     styled Styled.div
         ([ backgroundColor bg
@@ -222,13 +234,14 @@ toast theme model =
          , textAlign center
          , borderRadius (px 2)
          , padding (px 4)
-         , height (px 68)
-         , width (px model.width)
+         , height notificationHeight
+         , fontSize notificationFontSize
          , displayFlex
          , flexDirection column
          , justifyContent center
          , position absolute
          , margin (px 10)
+         , shadow
          ]
             ++ p
             ++ tr

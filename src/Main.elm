@@ -3,11 +3,13 @@ module Main exposing (main)
 import Browser
 import Button exposing (button, defaultButton)
 import Checkbox exposing (checkbox, defaultCheckbox)
+import Css exposing (px, width)
 import Html
 import Html.Styled exposing (Html, nav, text, toUnstyled)
-import Html.Styled.Attributes exposing (placeholder, value)
+import Html.Styled.Attributes exposing (css, placeholder, value)
 import Html.Styled.Events exposing (onClick, onInput)
 import Input exposing (defaultInput, input)
+import Selector exposing (Option, defaultSelector, dropdownItem, selector)
 import Theme exposing (Size(..), defaultTheme)
 import Toast exposing (Position(..), defaultToast, toast)
 
@@ -17,11 +19,14 @@ type Msg
     | Click
     | Input String
     | Check
+    | Select Option
 
 
 type alias Model =
     { input : String
     , checked : Bool
+    , selected : Option
+    , options : List Option
     }
 
 
@@ -29,6 +34,42 @@ initialModel : Model
 initialModel =
     { input = ""
     , checked = False
+    , selected =
+        { key = ""
+        , value = ""
+        }
+    , options =
+        [ { key = "Test"
+          , value = "Test1"
+          }
+        , { key = "Test 2"
+          , value = "Test2"
+          }
+        , { key = "Test 3"
+          , value = "Tes"
+          }
+        , { key = "Test 4"
+          , value = "Tes4"
+          }
+        , { key = "Test 5"
+          , value = "Test5"
+          }
+        , { key = "Test 6"
+          , value = "Test6"
+          }
+        , { key = "Test 7"
+          , value = "Test7"
+          }
+        , { key = "Test 8"
+          , value = "Test8"
+          }
+        , { key = "Test 9"
+          , value = "Test9"
+          }
+        , { key = "Test 10"
+          , value = "Test10"
+          }
+        ]
     }
 
 
@@ -59,6 +100,24 @@ view model =
             }
             []
             [ text "Notify things!" ]
+        , selector defaultTheme
+            { defaultSelector
+                | placeholder = "Select a choice"
+                , open = True
+                , options = model.options
+                , selected = model.selected
+            }
+            [ css
+                [ width (px 200) ]
+            ]
+            (List.map
+                (\option ->
+                    dropdownItem option
+                        model.selected
+                        [ onClick (Select option) ]
+                )
+                model.options
+            )
         ]
 
 
@@ -69,6 +128,9 @@ update msg model =
 
         Check ->
             { model | checked = not model.checked }
+
+        Select option ->
+            { model | selected = option }
 
         _ ->
             model

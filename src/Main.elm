@@ -20,6 +20,7 @@ type Msg
     | Input String
     | Check
     | Select Option
+    | OpenSelect Bool
 
 
 type alias Model =
@@ -27,6 +28,7 @@ type alias Model =
     , checked : Bool
     , selected : Option
     , options : List Option
+    , selectedOpen : Bool
     }
 
 
@@ -34,6 +36,7 @@ initialModel : Model
 initialModel =
     { input = ""
     , checked = False
+    , selectedOpen = False
     , selected =
         { key = ""
         , value = ""
@@ -103,13 +106,14 @@ view model =
         , selector defaultTheme
             { defaultSelector
                 | placeholder = "Select a choice"
-                , open = True
+                , open = model.selectedOpen
                 , options = model.options
                 , selected = model.selected
             }
             [ css
                 [ width (px 200) ]
             ]
+            [ onClick <| OpenSelect <| not model.selectedOpen ]
             (List.map
                 (\option ->
                     dropdownItem option
@@ -121,6 +125,7 @@ view model =
         ]
 
 
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         Input val ->
@@ -130,7 +135,13 @@ update msg model =
             { model | checked = not model.checked }
 
         Select option ->
-            { model | selected = option }
+            { model
+                | selectedOpen = False
+                , selected = option
+            }
+
+        OpenSelect direction ->
+            { model | selectedOpen = direction }
 
         _ ->
             model

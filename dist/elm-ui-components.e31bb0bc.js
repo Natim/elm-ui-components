@@ -4551,7 +4551,8 @@ var author$project$Main$initialModel = {
 			{key: 'Test 9', value: 'Test9'},
 			{key: 'Test 10', value: 'Test10'}
 		]),
-	selected: {key: '', value: ''}
+	selected: {key: '', value: ''},
+	selectedOpen: false
 };
 var elm$core$Basics$not = _Basics_not;
 var author$project$Main$update = F2(
@@ -4570,7 +4571,12 @@ var author$project$Main$update = F2(
 				var option = msg.a;
 				return _Utils_update(
 					model,
-					{selected: option});
+					{selected: option, selectedOpen: false});
+			case 'OpenSelect':
+				var direction = msg.a;
+				return _Utils_update(
+					model,
+					{selectedOpen: direction});
 			default:
 				return model;
 		}
@@ -8223,6 +8229,9 @@ var author$project$Main$Click = {$: 'Click'};
 var author$project$Main$Input = function (a) {
 	return {$: 'Input', a: a};
 };
+var author$project$Main$OpenSelect = function (a) {
+	return {$: 'OpenSelect', a: a};
+};
 var author$project$Main$Select = function (a) {
 	return {$: 'Select', a: a};
 };
@@ -8503,8 +8512,8 @@ var rtfeldman$elm_css$Html$Styled$Attributes$boolProperty = F2(
 	});
 var rtfeldman$elm_css$Html$Styled$Attributes$readonly = rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('readOnly');
 var rtfeldman$elm_css$Html$Styled$Attributes$value = rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('value');
-var author$project$Selector$selector = F4(
-	function (theme, model, attr, inner) {
+var author$project$Selector$selector = F5(
+	function (theme, model, attr, inputAttr, inner) {
 		var panelVisibility = model.open ? _List_fromArray(
 			[
 				rtfeldman$elm_css$Css$visibility(rtfeldman$elm_css$Css$visible),
@@ -8515,10 +8524,8 @@ var author$project$Selector$selector = F4(
 				rtfeldman$elm_css$Css$visibility(rtfeldman$elm_css$Css$hidden),
 				rtfeldman$elm_css$Css$opacity(rtfeldman$elm_css$Css$zero)
 			]);
-		return A4(
-			rtfeldman$elm_css$Html$Styled$styled,
+		return A2(
 			rtfeldman$elm_css$Html$Styled$div,
-			_List_Nil,
 			attr,
 			_List_fromArray(
 				[
@@ -8526,12 +8533,14 @@ var author$project$Selector$selector = F4(
 					author$project$Selector$input,
 					theme,
 					model,
-					_List_fromArray(
-						[
-							rtfeldman$elm_css$Html$Styled$Attributes$placeholder(model.placeholder),
-							rtfeldman$elm_css$Html$Styled$Attributes$value(model.selected.value),
-							rtfeldman$elm_css$Html$Styled$Attributes$readonly(true)
-						]),
+					_Utils_ap(
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Html$Styled$Attributes$placeholder(model.placeholder),
+								rtfeldman$elm_css$Html$Styled$Attributes$value(model.selected.value),
+								rtfeldman$elm_css$Html$Styled$Attributes$readonly(true)
+							]),
+						inputAttr),
 					_List_Nil),
 					A3(
 					author$project$Selector$dropdownPanel,
@@ -9003,12 +9012,12 @@ var author$project$Main$view = function (model) {
 					[
 						rtfeldman$elm_css$Html$Styled$text('Notify things!')
 					])),
-				A4(
+				A5(
 				author$project$Selector$selector,
 				author$project$Theme$defaultTheme,
 				_Utils_update(
 					author$project$Selector$defaultSelector,
-					{open: true, options: model.options, placeholder: 'Select a choice', selected: model.selected}),
+					{open: model.selectedOpen, options: model.options, placeholder: 'Select a choice', selected: model.selected}),
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$Attributes$css(
@@ -9017,6 +9026,11 @@ var author$project$Main$view = function (model) {
 								rtfeldman$elm_css$Css$width(
 								rtfeldman$elm_css$Css$px(200))
 							]))
+					]),
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Html$Styled$Events$onClick(
+						author$project$Main$OpenSelect(!model.selectedOpen))
 					]),
 				A2(
 					elm$core$List$map,
@@ -9793,7 +9807,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52805" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55115" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

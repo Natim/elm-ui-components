@@ -144,8 +144,8 @@ input theme model =
 
 {-| A styled select element
 -}
-selector : Theme -> Selector -> List (Attribute msg) -> List (Html msg) -> Html msg
-selector theme model attr inner =
+selector : Theme -> Selector -> List (Attribute msg) -> List (Attribute msg) -> List (Html msg) -> Html msg
+selector theme model attr inputAttr inner =
     let
         panelVisibility =
             if model.open then
@@ -158,12 +158,11 @@ selector theme model attr inner =
                 , opacity zero
                 ]
     in
-    styled Styled.div
-        []
+    Styled.div
         attr
         [ input theme
             model
-            [ placeholder model.placeholder, value model.selected.value, readonly True ]
+            ([ placeholder model.placeholder, value model.selected.value, readonly True ] ++ inputAttr)
             []
         , dropdownPanel theme
             [ css panelVisibility ]

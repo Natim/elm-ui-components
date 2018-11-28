@@ -4571,12 +4571,7 @@ var author$project$Main$update = F2(
 				var option = msg.a;
 				return _Utils_update(
 					model,
-					{selected: option, selectedOpen: false});
-			case 'OpenSelect':
-				var direction = msg.a;
-				return _Utils_update(
-					model,
-					{selectedOpen: direction});
+					{selected: option, selectedOpen: !model.selectedOpen});
 			default:
 				return model;
 		}
@@ -8229,9 +8224,6 @@ var author$project$Main$Click = {$: 'Click'};
 var author$project$Main$Input = function (a) {
 	return {$: 'Input', a: a};
 };
-var author$project$Main$OpenSelect = function (a) {
-	return {$: 'OpenSelect', a: a};
-};
 var author$project$Main$Select = function (a) {
 	return {$: 'Select', a: a};
 };
@@ -8512,8 +8504,33 @@ var rtfeldman$elm_css$Html$Styled$Attributes$boolProperty = F2(
 	});
 var rtfeldman$elm_css$Html$Styled$Attributes$readonly = rtfeldman$elm_css$Html$Styled$Attributes$boolProperty('readOnly');
 var rtfeldman$elm_css$Html$Styled$Attributes$value = rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('value');
+var elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var rtfeldman$elm_css$VirtualDom$Styled$on = F2(
+	function (eventName, handler) {
+		return A3(
+			rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2(elm$virtual_dom$VirtualDom$on, eventName, handler),
+			_List_Nil,
+			'');
+	});
+var rtfeldman$elm_css$Html$Styled$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			rtfeldman$elm_css$VirtualDom$Styled$on,
+			event,
+			elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
 var author$project$Selector$selector = F5(
-	function (theme, model, attr, inputAttr, inner) {
+	function (theme, model, selectMsg, attr, inner) {
 		var panelVisibility = model.open ? _List_fromArray(
 			[
 				rtfeldman$elm_css$Css$visibility(rtfeldman$elm_css$Css$visible),
@@ -8533,14 +8550,14 @@ var author$project$Selector$selector = F5(
 					author$project$Selector$input,
 					theme,
 					model,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								rtfeldman$elm_css$Html$Styled$Attributes$placeholder(model.placeholder),
-								rtfeldman$elm_css$Html$Styled$Attributes$value(model.selected.value),
-								rtfeldman$elm_css$Html$Styled$Attributes$readonly(true)
-							]),
-						inputAttr),
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$Attributes$placeholder(model.placeholder),
+							rtfeldman$elm_css$Html$Styled$Attributes$value(model.selected.value),
+							rtfeldman$elm_css$Html$Styled$Attributes$readonly(true),
+							rtfeldman$elm_css$Html$Styled$Events$onClick(
+							selectMsg(model.selected))
+						]),
 					_List_Nil),
 					A3(
 					author$project$Selector$dropdownPanel,
@@ -8551,7 +8568,23 @@ var author$project$Selector$selector = F5(
 						]),
 					_List_fromArray(
 						[
-							A2(author$project$Selector$panelWrapper, _List_Nil, inner)
+							A2(
+							author$project$Selector$panelWrapper,
+							_List_Nil,
+							A2(
+								elm$core$List$map,
+								function (option) {
+									return A3(
+										author$project$Selector$dropdownItem,
+										option,
+										model.selected,
+										_List_fromArray(
+											[
+												rtfeldman$elm_css$Html$Styled$Events$onClick(
+												selectMsg(option))
+											]));
+								},
+								model.options))
 						]))
 				]));
 	});
@@ -8901,31 +8934,6 @@ var author$project$Toast$toast = F2(
 				_Utils_ap(p, tr)));
 	});
 var rtfeldman$elm_css$Html$Styled$nav = rtfeldman$elm_css$Html$Styled$node('nav');
-var elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var rtfeldman$elm_css$VirtualDom$Styled$on = F2(
-	function (eventName, handler) {
-		return A3(
-			rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2(elm$virtual_dom$VirtualDom$on, eventName, handler),
-			_List_Nil,
-			'');
-	});
-var rtfeldman$elm_css$Html$Styled$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			rtfeldman$elm_css$VirtualDom$Styled$on,
-			event,
-			elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
-	return A2(
-		rtfeldman$elm_css$Html$Styled$Events$on,
-		'click',
-		elm$json$Json$Decode$succeed(msg));
-};
 var rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
@@ -9018,6 +9026,7 @@ var author$project$Main$view = function (model) {
 				_Utils_update(
 					author$project$Selector$defaultSelector,
 					{open: model.selectedOpen, options: model.options, placeholder: 'Select a choice', selected: model.selected}),
+				author$project$Main$Select,
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$Attributes$css(
@@ -9027,25 +9036,7 @@ var author$project$Main$view = function (model) {
 								rtfeldman$elm_css$Css$px(200))
 							]))
 					]),
-				_List_fromArray(
-					[
-						rtfeldman$elm_css$Html$Styled$Events$onClick(
-						author$project$Main$OpenSelect(!model.selectedOpen))
-					]),
-				A2(
-					elm$core$List$map,
-					function (option) {
-						return A3(
-							author$project$Selector$dropdownItem,
-							option,
-							model.selected,
-							_List_fromArray(
-								[
-									rtfeldman$elm_css$Html$Styled$Events$onClick(
-									author$project$Main$Select(option))
-								]));
-					},
-					model.options))
+				_List_Nil)
 			]));
 };
 var elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -9807,7 +9798,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55115" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60536" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

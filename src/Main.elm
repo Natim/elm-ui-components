@@ -20,7 +20,6 @@ type Msg
     | Input String
     | Check
     | Select Option
-    | OpenSelect Bool
 
 
 type alias Model =
@@ -110,18 +109,11 @@ view model =
                 , options = model.options
                 , selected = model.selected
             }
+            Select
             [ css
                 [ width (px 200) ]
             ]
-            [ onClick <| OpenSelect <| not model.selectedOpen ]
-            (List.map
-                (\option ->
-                    dropdownItem option
-                        model.selected
-                        [ onClick (Select option) ]
-                )
-                model.options
-            )
+            []
         ]
 
 
@@ -136,12 +128,9 @@ update msg model =
 
         Select option ->
             { model
-                | selectedOpen = False
+                | selectedOpen = not model.selectedOpen
                 , selected = option
             }
-
-        OpenSelect direction ->
-            { model | selectedOpen = direction }
 
         _ ->
             model

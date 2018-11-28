@@ -144,8 +144,8 @@ input theme model =
 
 {-| A styled select element
 -}
-selector : Theme -> Selector -> List (Attribute msg) -> List (Attribute msg) -> List (Html msg) -> Html msg
-selector theme model attr inputAttr inner =
+selector : Theme -> Selector -> (Option -> msg) -> List (Attribute msg) -> List (Html msg) -> Html msg
+selector theme model selectMsg attr inner =
     let
         panelVisibility =
             if model.open then
@@ -162,11 +162,18 @@ selector theme model attr inputAttr inner =
         attr
         [ input theme
             model
-            ([ placeholder model.placeholder, value model.selected.value, readonly True ] ++ inputAttr)
+            [ placeholder model.placeholder, value model.selected.value, readonly True, onClick (selectMsg model.selected) ]
             []
         , dropdownPanel theme
             [ css panelVisibility ]
             [ panelWrapper []
-                inner
+                (List.map
+                    (\option ->
+                        dropdownItem option
+                            model.selected
+                            [ onClick (selectMsg option) ]
+                    )
+                    model.options
+                )
             ]
         ]

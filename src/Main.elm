@@ -108,6 +108,7 @@ view model =
                 , open = model.selectedOpen
                 , options = model.options
                 , selected = model.selected
+                , kind = Theme.Danger
             }
             Select
             [ css

@@ -8235,6 +8235,22 @@ var author$project$Selector$defaultSelector = {
 	selected: {key: '', value: ''},
 	size: author$project$Theme$Medium
 };
+var author$project$Selector$getColor = F2(
+	function (theme, model) {
+		var _n0 = model.kind;
+		switch (_n0.$) {
+			case 'Primary':
+				return theme.primary;
+			case 'Secondary':
+				return theme.secondary;
+			case 'Warning':
+				return theme.warning;
+			case 'Success':
+				return theme.success;
+			default:
+				return theme.danger;
+		}
+	});
 var rtfeldman$elm_css$Css$ellipsis = {textOverflow: rtfeldman$elm_css$Css$Structure$Compatible, value: 'ellipsis'};
 var rtfeldman$elm_css$Css$hidden = {borderStyle: rtfeldman$elm_css$Css$Structure$Compatible, overflow: rtfeldman$elm_css$Css$Structure$Compatible, value: 'hidden', visibility: rtfeldman$elm_css$Css$Structure$Compatible};
 var rtfeldman$elm_css$Css$hover = rtfeldman$elm_css$Css$pseudoClass('hover');
@@ -8266,35 +8282,44 @@ var rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
 		elm$virtual_dom$VirtualDom$text(str));
 };
 var rtfeldman$elm_css$Html$Styled$text = rtfeldman$elm_css$VirtualDom$Styled$text;
-var author$project$Selector$dropdownItem = F3(
-	function (option, selected, attrs) {
+var author$project$Selector$dropdownItem = F4(
+	function (theme, model, option, attrs) {
+		var selectedStyles = _Utils_eq(option.key, model.selected.key) ? _List_fromArray(
+			[
+				rtfeldman$elm_css$Css$backgroundColor(
+				A2(author$project$Selector$getColor, theme, model)),
+				rtfeldman$elm_css$Css$color(
+				rtfeldman$elm_css$Css$hex('#FFF'))
+			]) : _List_Nil;
 		var item = A2(
 			rtfeldman$elm_css$Html$Styled$styled,
 			rtfeldman$elm_css$Html$Styled$div,
-			_List_fromArray(
-				[
-					rtfeldman$elm_css$Css$textOverflow(rtfeldman$elm_css$Css$ellipsis),
-					rtfeldman$elm_css$Css$whiteSpace(rtfeldman$elm_css$Css$noWrap),
-					rtfeldman$elm_css$Css$overflow(rtfeldman$elm_css$Css$hidden),
-					rtfeldman$elm_css$Css$borderRadius(
-					rtfeldman$elm_css$Css$px(2)),
-					A4(
-					rtfeldman$elm_css$Css$padding4,
-					rtfeldman$elm_css$Css$px(8),
-					rtfeldman$elm_css$Css$px(30),
-					rtfeldman$elm_css$Css$px(8),
-					rtfeldman$elm_css$Css$px(10)),
-					rtfeldman$elm_css$Css$whiteSpace(rtfeldman$elm_css$Css$noWrap),
-					rtfeldman$elm_css$Css$overflow(rtfeldman$elm_css$Css$hidden),
-					rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$relative),
-					rtfeldman$elm_css$Css$cursor(rtfeldman$elm_css$Css$pointer),
-					rtfeldman$elm_css$Css$hover(
-					_List_fromArray(
-						[
-							rtfeldman$elm_css$Css$backgroundColor(
-							rtfeldman$elm_css$Css$hex('#f0f0f0'))
-						]))
-				]));
+			_Utils_ap(
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Css$textOverflow(rtfeldman$elm_css$Css$ellipsis),
+						rtfeldman$elm_css$Css$whiteSpace(rtfeldman$elm_css$Css$noWrap),
+						rtfeldman$elm_css$Css$overflow(rtfeldman$elm_css$Css$hidden),
+						rtfeldman$elm_css$Css$borderRadius(
+						rtfeldman$elm_css$Css$px(2)),
+						A4(
+						rtfeldman$elm_css$Css$padding4,
+						rtfeldman$elm_css$Css$px(8),
+						rtfeldman$elm_css$Css$px(30),
+						rtfeldman$elm_css$Css$px(8),
+						rtfeldman$elm_css$Css$px(10)),
+						rtfeldman$elm_css$Css$whiteSpace(rtfeldman$elm_css$Css$noWrap),
+						rtfeldman$elm_css$Css$overflow(rtfeldman$elm_css$Css$hidden),
+						rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$relative),
+						rtfeldman$elm_css$Css$cursor(rtfeldman$elm_css$Css$pointer),
+						rtfeldman$elm_css$Css$hover(
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Css$backgroundColor(
+								rtfeldman$elm_css$Css$hex('#f0f0f0'))
+							]))
+					]),
+				selectedStyles));
 		return A2(
 			item,
 			attrs,
@@ -8383,21 +8408,7 @@ var author$project$Selector$dropdownPanel = function (theme) {
 };
 var author$project$Selector$input = F2(
 	function (theme, model) {
-		var textColor = function () {
-			var _n2 = model.kind;
-			switch (_n2.$) {
-				case 'Primary':
-					return theme.primary;
-				case 'Secondary':
-					return theme.secondary;
-				case 'Warning':
-					return theme.warning;
-				case 'Success':
-					return theme.success;
-				default:
-					return theme.danger;
-			}
-		}();
+		var textColor = A2(author$project$Selector$getColor, theme, model);
 		var _n0 = function () {
 			var _n1 = model.size;
 			switch (_n1.$) {
@@ -8455,7 +8466,8 @@ var author$project$Selector$input = F2(
 					rtfeldman$elm_css$Css$hex('#DDD')),
 					rtfeldman$elm_css$Css$lineHeight(
 					rtfeldman$elm_css$Css$px(16)),
-					rtfeldman$elm_css$Css$width(rtfeldman$elm_css$Css$inherit)
+					rtfeldman$elm_css$Css$width(rtfeldman$elm_css$Css$inherit),
+					rtfeldman$elm_css$Css$cursor(rtfeldman$elm_css$Css$pointer)
 				]));
 	});
 var rtfeldman$elm_css$Css$flex = rtfeldman$elm_css$Css$prop1('flex');
@@ -8574,10 +8586,11 @@ var author$project$Selector$selector = F5(
 							A2(
 								elm$core$List$map,
 								function (option) {
-									return A3(
+									return A4(
 										author$project$Selector$dropdownItem,
+										theme,
+										model,
 										option,
-										model.selected,
 										_List_fromArray(
 											[
 												rtfeldman$elm_css$Html$Styled$Events$onClick(
@@ -8588,6 +8601,7 @@ var author$project$Selector$selector = F5(
 						]))
 				]));
 	});
+var author$project$Theme$Danger = {$: 'Danger'};
 var author$project$Theme$Large = {$: 'Large'};
 var author$project$Theme$defaultTheme = {
 	danger: rtfeldman$elm_css$Css$hex('#E04141'),
@@ -9025,7 +9039,7 @@ var author$project$Main$view = function (model) {
 				author$project$Theme$defaultTheme,
 				_Utils_update(
 					author$project$Selector$defaultSelector,
-					{open: model.selectedOpen, options: model.options, placeholder: 'Select a choice', selected: model.selected}),
+					{kind: author$project$Theme$Danger, open: model.selectedOpen, options: model.options, placeholder: 'Select a choice', selected: model.selected}),
 				author$project$Main$Select,
 				_List_fromArray(
 					[

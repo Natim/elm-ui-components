@@ -53,24 +53,52 @@ panelWrapper =
         ]
 
 
-dropdownItem : Option -> Option -> List (Attribute msg) -> Html msg
-dropdownItem option selected attrs =
+getColor : Theme -> Selector -> Css.Color
+getColor theme model =
+    case model.kind of
+        Primary ->
+            theme.primary
+
+        Secondary ->
+            theme.secondary
+
+        Warning ->
+            theme.warning
+
+        Success ->
+            theme.success
+
+        Danger ->
+            theme.danger
+
+
+dropdownItem : Theme -> Selector -> Option -> List (Attribute msg) -> Html msg
+dropdownItem theme model option attrs =
     let
+        selectedStyles =
+            if option.key == model.selected.key then
+                [ backgroundColor (getColor theme model), color (hex "#FFF") ]
+
+            else
+                []
+
         item =
             styled Styled.div
-                [ textOverflow ellipsis
-                , whiteSpace noWrap
-                , overflow hidden
-                , borderRadius (px 2)
-                , padding4 (px 8) (px 30) (px 8) (px 10)
-                , whiteSpace noWrap
-                , overflow hidden
-                , position relative
-                , cursor pointer
-                , hover
+                ([ textOverflow ellipsis
+                 , whiteSpace noWrap
+                 , overflow hidden
+                 , borderRadius (px 2)
+                 , padding4 (px 8) (px 30) (px 8) (px 10)
+                 , whiteSpace noWrap
+                 , overflow hidden
+                 , position relative
+                 , cursor pointer
+                 , hover
                     [ backgroundColor (hex "#f0f0f0")
                     ]
-                ]
+                 ]
+                    ++ selectedStyles
+                )
     in
     item attrs [ text option.value ]
 
@@ -97,21 +125,7 @@ input : Theme -> Selector -> List (Attribute msg) -> List (Html msg) -> Html msg
 input theme model =
     let
         textColor =
-            case model.kind of
-                Primary ->
-                    theme.primary
-
-                Secondary ->
-                    theme.secondary
-
-                Warning ->
-                    theme.warning
-
-                Success ->
-                    theme.success
-
-                Danger ->
-                    theme.danger
+            getColor theme model
 
         ( fs, h ) =
             case model.size of
@@ -139,6 +153,7 @@ input theme model =
         , border3 (px 1) solid (hex "#DDD")
         , lineHeight (px 16)
         , width inherit
+        , cursor pointer
         ]
 
 
@@ -169,8 +184,9 @@ selector theme model selectMsg attr inner =
             [ panelWrapper []
                 (List.map
                     (\option ->
-                        dropdownItem option
-                            model.selected
+                        dropdownItem theme
+                            model
+                            option
                             [ onClick (selectMsg option) ]
                     )
                     model.options

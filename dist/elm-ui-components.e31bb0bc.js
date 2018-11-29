@@ -4538,6 +4538,7 @@ var elm$core$Set$toList = function (_n0) {
 var author$project$Main$initialModel = {
 	checked: false,
 	input: '',
+	modalOpen: false,
 	options: _List_fromArray(
 		[
 			{key: 'Test', value: 'Test1'},
@@ -4572,6 +4573,11 @@ var author$project$Main$update = F2(
 				return _Utils_update(
 					model,
 					{selected: option, selectedOpen: !model.selectedOpen});
+			case 'ToggleModal':
+				var direction = msg.a;
+				return _Utils_update(
+					model,
+					{modalOpen: direction});
 			default:
 				return model;
 		}
@@ -8227,6 +8233,214 @@ var author$project$Main$Input = function (a) {
 var author$project$Main$Select = function (a) {
 	return {$: 'Select', a: a};
 };
+var author$project$Main$ToggleModal = function (a) {
+	return {$: 'ToggleModal', a: a};
+};
+var author$project$Main$alwaysPreventDefault = function (msg) {
+	return _Utils_Tuple2(msg, true);
+};
+var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var rtfeldman$elm_css$VirtualDom$Styled$on = F2(
+	function (eventName, handler) {
+		return A3(
+			rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2(elm$virtual_dom$VirtualDom$on, eventName, handler),
+			_List_Nil,
+			'');
+	});
+var rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			rtfeldman$elm_css$VirtualDom$Styled$on,
+			event,
+			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var author$project$Main$onClick = function (msg) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
+		'click',
+		A2(
+			elm$json$Json$Decode$map,
+			author$project$Main$alwaysPreventDefault,
+			elm$json$Json$Decode$succeed(msg)));
+};
+var author$project$Modal$defaultModal = {
+	kind: author$project$Theme$Primary,
+	open: false,
+	size: author$project$Theme$Medium,
+	text: rtfeldman$elm_css$Css$hex('#FFF')
+};
+var rtfeldman$elm_css$Css$absolute = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
+var rtfeldman$elm_css$Css$left = rtfeldman$elm_css$Css$prop1('left');
+var rtfeldman$elm_css$Css$minHeight = rtfeldman$elm_css$Css$prop1('min-height');
+var rtfeldman$elm_css$Css$minWidth = rtfeldman$elm_css$Css$prop1('min-width');
+var rtfeldman$elm_css$Css$position = rtfeldman$elm_css$Css$prop1('position');
+var rtfeldman$elm_css$Css$top = rtfeldman$elm_css$Css$prop1('top');
+var rtfeldman$elm_css$Css$VhUnits = {$: 'VhUnits'};
+var rtfeldman$elm_css$Css$vh = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$VhUnits, 'vh');
+var rtfeldman$elm_css$Css$VwUnits = {$: 'VwUnits'};
+var rtfeldman$elm_css$Css$vw = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$VwUnits, 'vw');
+var rtfeldman$elm_css$Css$zIndex = rtfeldman$elm_css$Css$prop1('z-index');
+var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div');
+var author$project$Modal$modalContent = F2(
+	function (theme, model) {
+		return A2(
+			rtfeldman$elm_css$Html$Styled$styled,
+			rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					rtfeldman$elm_css$Css$backgroundColor(
+					rtfeldman$elm_css$Css$hex('#FDFDFD')),
+					rtfeldman$elm_css$Css$borderRadius(
+					rtfeldman$elm_css$Css$px(2)),
+					rtfeldman$elm_css$Css$color(
+					rtfeldman$elm_css$Css$hex('#707070')),
+					rtfeldman$elm_css$Css$zIndex(
+					rtfeldman$elm_css$Css$int(1)),
+					rtfeldman$elm_css$Css$minWidth(
+					rtfeldman$elm_css$Css$vw(10)),
+					rtfeldman$elm_css$Css$minHeight(
+					rtfeldman$elm_css$Css$vh(10)),
+					rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$absolute),
+					rtfeldman$elm_css$Css$left(
+					rtfeldman$elm_css$Css$pct(50)),
+					rtfeldman$elm_css$Css$top(
+					rtfeldman$elm_css$Css$pct(50)),
+					rtfeldman$elm_css$Css$transforms(
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Css$translateY(
+							rtfeldman$elm_css$Css$pct(-50)),
+							rtfeldman$elm_css$Css$translateX(
+							rtfeldman$elm_css$Css$pct(-50))
+						]))
+				]));
+	});
+var author$project$Modal$alwaysPreventDefault = function (msg) {
+	return _Utils_Tuple2(msg, true);
+};
+var author$project$Modal$onClick = function (msg) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
+		'click',
+		A2(
+			elm$json$Json$Decode$map,
+			author$project$Modal$alwaysPreventDefault,
+			elm$json$Json$Decode$succeed(msg)));
+};
+var rtfeldman$elm_css$Css$block = {display: rtfeldman$elm_css$Css$Structure$Compatible, value: 'block'};
+var rtfeldman$elm_css$Css$fixed = {backgroundAttachment: rtfeldman$elm_css$Css$Structure$Compatible, position: rtfeldman$elm_css$Css$Structure$Compatible, tableLayout: rtfeldman$elm_css$Css$Structure$Compatible, value: 'fixed'};
+var rtfeldman$elm_css$Css$rgba = F4(
+	function (r, g, b, alpha) {
+		return {
+			alpha: alpha,
+			blue: b,
+			color: rtfeldman$elm_css$Css$Structure$Compatible,
+			green: g,
+			red: r,
+			value: A2(
+				rtfeldman$elm_css$Css$cssFunction,
+				'rgba',
+				_Utils_ap(
+					A2(
+						elm$core$List$map,
+						elm$core$String$fromInt,
+						_List_fromArray(
+							[r, g, b])),
+					_List_fromArray(
+						[
+							elm$core$String$fromFloat(alpha)
+						])))
+		};
+	});
+var author$project$Modal$modal = F5(
+	function (theme, model, msg, attr, inner) {
+		var openStyles = model.open ? _List_fromArray(
+			[
+				rtfeldman$elm_css$Css$display(rtfeldman$elm_css$Css$block)
+			]) : _List_fromArray(
+			[
+				rtfeldman$elm_css$Css$display(rtfeldman$elm_css$Css$none)
+			]);
+		var bg = function () {
+			var _n2 = model.kind;
+			switch (_n2.$) {
+				case 'Primary':
+					return theme.primary;
+				case 'Secondary':
+					return theme.secondary;
+				case 'Warning':
+					return theme.warning;
+				case 'Success':
+					return theme.success;
+				default:
+					return theme.danger;
+			}
+		}();
+		var bga = A4(rtfeldman$elm_css$Css$rgba, bg.red, bg.green, bg.blue, 0.3);
+		var _n0 = function () {
+			var _n1 = model.size;
+			switch (_n1.$) {
+				case 'Small':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(12),
+						rtfeldman$elm_css$Css$px(26));
+				case 'Medium':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(24),
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(36));
+				default:
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(30),
+						rtfeldman$elm_css$Css$px(22),
+						rtfeldman$elm_css$Css$px(50));
+			}
+		}();
+		var p = _n0.a;
+		var fs = _n0.b;
+		var h = _n0.c;
+		return A4(
+			rtfeldman$elm_css$Html$Styled$styled,
+			rtfeldman$elm_css$Html$Styled$div,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Css$backgroundColor(bga),
+						rtfeldman$elm_css$Css$fontSize(fs),
+						rtfeldman$elm_css$Css$fontFamilies(theme.font),
+						rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$fixed),
+						rtfeldman$elm_css$Css$width(
+						rtfeldman$elm_css$Css$vw(100)),
+						rtfeldman$elm_css$Css$height(
+						rtfeldman$elm_css$Css$vh(100)),
+						rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
+						rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+					]),
+				openStyles),
+			_List_fromArray(
+				[
+					author$project$Modal$onClick(
+					msg(false))
+				]),
+			_List_fromArray(
+				[
+					A4(
+					author$project$Modal$modalContent,
+					theme,
+					model,
+					_List_fromArray(
+						[
+							author$project$Modal$onClick(
+							msg(true))
+						]),
+					inner)
+				]));
+	});
 var author$project$Selector$defaultSelector = {
 	kind: author$project$Theme$Primary,
 	open: false,
@@ -8268,11 +8482,9 @@ var rtfeldman$elm_css$Css$prop4 = F5(
 					[argA.value, argB.value, argC.value, argD.value])));
 	});
 var rtfeldman$elm_css$Css$padding4 = rtfeldman$elm_css$Css$prop4('padding');
-var rtfeldman$elm_css$Css$position = rtfeldman$elm_css$Css$prop1('position');
 var rtfeldman$elm_css$Css$relative = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'relative'};
 var rtfeldman$elm_css$Css$textOverflow = rtfeldman$elm_css$Css$prop1('text-overflow');
 var rtfeldman$elm_css$Css$whiteSpace = rtfeldman$elm_css$Css$prop1('white-space');
-var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
 	return {$: 'Unstyled', a: a};
@@ -8345,31 +8557,6 @@ var rtfeldman$elm_css$Css$inherit = _Utils_update(
 	rtfeldman$elm_css$Css$initial,
 	{value: 'inherit'});
 var rtfeldman$elm_css$Css$maxHeight = rtfeldman$elm_css$Css$prop1('max-height');
-var rtfeldman$elm_css$Css$rgba = F4(
-	function (r, g, b, alpha) {
-		return {
-			alpha: alpha,
-			blue: b,
-			color: rtfeldman$elm_css$Css$Structure$Compatible,
-			green: g,
-			red: r,
-			value: A2(
-				rtfeldman$elm_css$Css$cssFunction,
-				'rgba',
-				_Utils_ap(
-					A2(
-						elm$core$List$map,
-						elm$core$String$fromInt,
-						_List_fromArray(
-							[r, g, b])),
-					_List_fromArray(
-						[
-							elm$core$String$fromFloat(alpha)
-						])))
-		};
-	});
-var rtfeldman$elm_css$Css$top = rtfeldman$elm_css$Css$prop1('top');
-var rtfeldman$elm_css$Css$zIndex = rtfeldman$elm_css$Css$prop1('z-index');
 var author$project$Selector$dropdownPanel = function (theme) {
 	return A2(
 		rtfeldman$elm_css$Html$Styled$styled,
@@ -8487,8 +8674,6 @@ var author$project$Selector$panelWrapper = A2(
 			rtfeldman$elm_css$Css$flex(
 			rtfeldman$elm_css$Css$int(1))
 		]));
-var rtfeldman$elm_css$Css$visibility = rtfeldman$elm_css$Css$prop1('visibility');
-var rtfeldman$elm_css$Css$visible = {overflow: rtfeldman$elm_css$Css$Structure$Compatible, pointerEvents: rtfeldman$elm_css$Css$Structure$Compatible, value: 'visible', visibility: rtfeldman$elm_css$Css$Structure$Compatible};
 var rtfeldman$elm_css$Html$Styled$Attributes$css = rtfeldman$elm_css$Html$Styled$Internal$css;
 var rtfeldman$elm_css$VirtualDom$Styled$property = F2(
 	function (key, value) {
@@ -8519,15 +8704,6 @@ var rtfeldman$elm_css$Html$Styled$Attributes$value = rtfeldman$elm_css$Html$Styl
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var rtfeldman$elm_css$VirtualDom$Styled$on = F2(
-	function (eventName, handler) {
-		return A3(
-			rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2(elm$virtual_dom$VirtualDom$on, eventName, handler),
-			_List_Nil,
-			'');
-	});
 var rtfeldman$elm_css$Html$Styled$Events$on = F2(
 	function (event, decoder) {
 		return A2(
@@ -8545,13 +8721,11 @@ var author$project$Selector$selector = F5(
 	function (theme, model, selectMsg, attr, inner) {
 		var panelVisibility = model.open ? _List_fromArray(
 			[
-				rtfeldman$elm_css$Css$visibility(rtfeldman$elm_css$Css$visible),
-				rtfeldman$elm_css$Css$opacity(
-				rtfeldman$elm_css$Css$int(1))
+				rtfeldman$elm_css$Css$display(rtfeldman$elm_css$Css$block),
+				rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$absolute)
 			]) : _List_fromArray(
 			[
-				rtfeldman$elm_css$Css$visibility(rtfeldman$elm_css$Css$hidden),
-				rtfeldman$elm_css$Css$opacity(rtfeldman$elm_css$Css$zero)
+				rtfeldman$elm_css$Css$display(rtfeldman$elm_css$Css$none)
 			]);
 		return A2(
 			rtfeldman$elm_css$Html$Styled$div,
@@ -8623,14 +8797,12 @@ var author$project$Toast$defaultToast = {
 	visible: false,
 	z: 1
 };
-var rtfeldman$elm_css$Css$absolute = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
 var rtfeldman$elm_css$Css$bottom = rtfeldman$elm_css$Css$prop1('bottom');
 var rtfeldman$elm_css$Css$row = {flexDirection: rtfeldman$elm_css$Css$Structure$Compatible, flexDirectionOrWrap: rtfeldman$elm_css$Css$Structure$Compatible, value: 'row'};
 var rtfeldman$elm_css$Css$column = _Utils_update(
 	rtfeldman$elm_css$Css$row,
 	{value: 'column'});
 var rtfeldman$elm_css$Css$flexDirection = rtfeldman$elm_css$Css$prop1('flex-direction');
-var rtfeldman$elm_css$Css$left = rtfeldman$elm_css$Css$prop1('left');
 var rtfeldman$elm_css$Css$margin = rtfeldman$elm_css$Css$prop1('margin');
 var rtfeldman$elm_css$Css$right = rtfeldman$elm_css$Css$prop1('right');
 var rtfeldman$elm_css$Css$textAlign = function (fn) {
@@ -8951,16 +9123,6 @@ var rtfeldman$elm_css$Html$Styled$nav = rtfeldman$elm_css$Html$Styled$node('nav'
 var rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
 };
-var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			rtfeldman$elm_css$VirtualDom$Styled$on,
-			event,
-			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
@@ -8995,7 +9157,7 @@ var author$project$Main$view = function (model) {
 					{size: author$project$Theme$Large}),
 				_List_fromArray(
 					[
-						rtfeldman$elm_css$Html$Styled$Events$onClick(author$project$Main$Click)
+						author$project$Main$onClick(author$project$Main$Click)
 					]),
 				_List_fromArray(
 					[
@@ -9020,7 +9182,7 @@ var author$project$Main$view = function (model) {
 					{checked: model.checked, size: author$project$Theme$Medium}),
 				_List_fromArray(
 					[
-						rtfeldman$elm_css$Html$Styled$Events$onClick(author$project$Main$Check)
+						author$project$Main$onClick(author$project$Main$Check)
 					]),
 				_List_Nil),
 				A4(
@@ -9050,7 +9212,44 @@ var author$project$Main$view = function (model) {
 								rtfeldman$elm_css$Css$px(200))
 							]))
 					]),
-				_List_Nil)
+				_List_Nil),
+				A4(
+				author$project$Button$button,
+				author$project$Theme$defaultTheme,
+				author$project$Button$defaultButton,
+				_List_fromArray(
+					[
+						author$project$Main$onClick(
+						author$project$Main$ToggleModal(true))
+					]),
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Html$Styled$text('OpenModal')
+					])),
+				A5(
+				author$project$Modal$modal,
+				author$project$Theme$defaultTheme,
+				_Utils_update(
+					author$project$Modal$defaultModal,
+					{open: model.modalOpen}),
+				author$project$Main$ToggleModal,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A4(
+						author$project$Button$button,
+						author$project$Theme$defaultTheme,
+						author$project$Button$defaultButton,
+						_List_fromArray(
+							[
+								author$project$Main$onClick(
+								author$project$Main$ToggleModal(false))
+							]),
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Html$Styled$text('Close it!')
+							]))
+					]))
 			]));
 };
 var elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -9812,7 +10011,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60536" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61596" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

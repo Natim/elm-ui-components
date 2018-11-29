@@ -5,13 +5,25 @@ import Button exposing (button, defaultButton)
 import Checkbox exposing (checkbox, defaultCheckbox)
 import Css exposing (px, width)
 import Html
-import Html.Styled exposing (Html, nav, text, toUnstyled)
+import Html.Styled exposing (Attribute, Html, nav, text, toUnstyled)
 import Html.Styled.Attributes exposing (css, placeholder, value)
-import Html.Styled.Events exposing (onClick, onInput)
+import Html.Styled.Events exposing (onInput, stopPropagationOn)
 import Input exposing (defaultInput, input)
+import Json.Decode as Json
+import Modal exposing (defaultModal, modal)
 import Selector exposing (Option, defaultSelector, dropdownItem, selector)
 import Theme exposing (Size(..), defaultTheme)
 import Toast exposing (Position(..), defaultToast, toast)
+
+
+onClick : msg -> Attribute msg
+onClick msg =
+    stopPropagationOn "click" (Json.map alwaysPreventDefault (Json.succeed msg))
+
+
+alwaysPreventDefault : msg -> ( msg, Bool )
+alwaysPreventDefault msg =
+    ( msg, True )
 
 
 type Msg
@@ -20,6 +32,7 @@ type Msg
     | Input String
     | Check
     | Select Option
+    | ToggleModal Bool
 
 
 type alias Model =
@@ -28,6 +41,7 @@ type alias Model =
     , selected : Option
     , options : List Option
     , selectedOpen : Bool
+    , modalOpen : Bool
     }
 
 
@@ -36,6 +50,7 @@ initialModel =
     { input = ""
     , checked = False
     , selectedOpen = False
+    , modalOpen = False
     , selected =
         { key = ""
         , value = ""
@@ -115,6 +130,22 @@ view model =
                 [ width (px 200) ]
             ]
             []
+        , button
+            defaultTheme
+            defaultButton
+            [ onClick <| ToggleModal True ]
+            [ text "OpenModal" ]
+        , modal
+            defaultTheme
+            { defaultModal | open = model.modalOpen }
+            ToggleModal
+            []
+            [ button
+                defaultTheme
+                defaultButton
+                [ onClick <| ToggleModal False ]
+                [ text "Close it!" ]
+            ]
         ]
 
 
@@ -132,6 +163,9 @@ update msg model =
                 | selectedOpen = not model.selectedOpen
                 , selected = option
             }
+
+        ToggleModal direction ->
+            { model | modalOpen = direction }
 
         _ ->
             model

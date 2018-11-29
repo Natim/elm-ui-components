@@ -1,6 +1,6 @@
 module Selector exposing (Option, Selector, defaultSelector, dropdownItem, selector)
 
-import Css exposing (Color, backgroundColor, border3, borderBox, borderRadius, boxShadow5, boxShadow6, boxSizing, color, cursor, displayFlex, ellipsis, flex, fontFamilies, fontSize, height, hex, hidden, hover, inherit, inset, int, lineHeight, maxHeight, noWrap, opacity, overflow, overflowY, padding, padding2, padding4, paddingRight, pct, pointer, position, px, relative, rgba, scroll, solid, textOverflow, top, transparent, visibility, visible, whiteSpace, width, zIndex, zero)
+import Css exposing (Color, absolute, backgroundColor, block, border3, borderBox, borderRadius, boxShadow5, boxShadow6, boxSizing, color, cursor, display, displayFlex, ellipsis, flex, fontFamilies, fontSize, height, hex, hidden, hover, inherit, inset, int, lineHeight, maxHeight, noWrap, none, opacity, overflow, overflowY, padding, padding2, padding4, paddingRight, pct, pointer, position, px, relative, rgba, scroll, solid, textOverflow, top, transparent, visibility, visible, whiteSpace, width, zIndex, zero)
 import Css.Transitions exposing (linear, transition)
 import Html.Styled as Styled exposing (Attribute, Html, styled, text)
 import Html.Styled.Attributes as Attributes exposing (css, placeholder, readonly, value)
@@ -164,13 +164,12 @@ selector theme model selectMsg attr inner =
     let
         panelVisibility =
             if model.open then
-                [ visibility visible
-                , opacity (int 1)
+                [ display block
+                , position absolute
                 ]
 
             else
-                [ visibility hidden
-                , opacity zero
+                [ display none
                 ]
     in
     Styled.div

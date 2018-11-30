@@ -22,6 +22,7 @@ type alias Modal =
     , size : Size
     , text : Color
     , open : Bool
+    , closeOnOverlay : Bool
     }
 
 
@@ -31,6 +32,7 @@ defaultModal =
     , size = Medium
     , text = hex "#FFF"
     , open = False
+    , closeOnOverlay = False
     }
 
 
@@ -106,5 +108,5 @@ modal theme model msg attr inner =
          ]
             ++ openStyles
         )
-        [ onClick <| msg False ]
-        [ modalContent theme model [ onClick <| msg True ] inner ]
+        [ onClick <| msg <| not model.closeOnOverlay ]
+        [ modalContent theme model ([ onClick <| msg True ] ++ attr) inner ]

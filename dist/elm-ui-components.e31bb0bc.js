@@ -8268,6 +8268,7 @@ var author$project$Main$onClick = function (msg) {
 			elm$json$Json$Decode$succeed(msg)));
 };
 var author$project$Modal$defaultModal = {
+	closeOnOverlay: false,
 	kind: author$project$Theme$Primary,
 	open: false,
 	size: author$project$Theme$Medium,
@@ -8425,7 +8426,7 @@ var author$project$Modal$modal = F5(
 			_List_fromArray(
 				[
 					author$project$Modal$onClick(
-					msg(false))
+					msg(!model.closeOnOverlay))
 				]),
 			_List_fromArray(
 				[
@@ -8433,11 +8434,13 @@ var author$project$Modal$modal = F5(
 					author$project$Modal$modalContent,
 					theme,
 					model,
-					_List_fromArray(
-						[
-							author$project$Modal$onClick(
-							msg(true))
-						]),
+					_Utils_ap(
+						_List_fromArray(
+							[
+								author$project$Modal$onClick(
+								msg(true))
+							]),
+						attr),
 					inner)
 				]));
 	});
@@ -9233,7 +9236,17 @@ var author$project$Main$view = function (model) {
 					author$project$Modal$defaultModal,
 					{open: model.modalOpen}),
 				author$project$Main$ToggleModal,
-				_List_Nil,
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Css$width(
+								rtfeldman$elm_css$Css$px(400)),
+								rtfeldman$elm_css$Css$height(
+								rtfeldman$elm_css$Css$px(400))
+							]))
+					]),
 				_List_fromArray(
 					[
 						A4(
@@ -10011,7 +10024,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61596" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55592" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

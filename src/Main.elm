@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser
 import Button exposing (button, defaultButton)
 import Checkbox exposing (checkbox, defaultCheckbox)
-import Css exposing (px, width)
+import Css exposing (height, px, width)
 import Html
 import Html.Styled exposing (Attribute, Html, nav, text, toUnstyled)
 import Html.Styled.Attributes exposing (css, placeholder, value)
@@ -137,9 +137,11 @@ view model =
             [ text "OpenModal" ]
         , modal
             defaultTheme
-            { defaultModal | open = model.modalOpen }
+            { defaultModal
+                | open = model.modalOpen
+            }
             ToggleModal
-            []
+            [ css [ width (px 400), height (px 400) ] ]
             [ button
                 defaultTheme
                 defaultButton

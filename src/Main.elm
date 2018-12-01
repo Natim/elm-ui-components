@@ -11,6 +11,7 @@ import Html.Styled.Events exposing (onInput, stopPropagationOn)
 import Input exposing (defaultInput, input)
 import Json.Decode as Json
 import Modal exposing (defaultModal, modal)
+import Navbar exposing (defaultNavbar, item, navbar, separator)
 import Selector exposing (Option, defaultSelector, dropdownItem, selector)
 import Theme exposing (Size(..), defaultTheme)
 import Toast exposing (Position(..), defaultToast, toast)
@@ -147,6 +148,15 @@ view model =
                 defaultButton
                 [ onClick <| ToggleModal False ]
                 [ text "Close it!" ]
+            ]
+        , navbar defaultTheme
+            { defaultNavbar | title = "Hello, WORLD" }
+            [ css [ width (px 600) ] ]
+            [ item defaultTheme [] [ text "Sad" ]
+            , separator defaultTheme [] []
+            , item defaultTheme [] [ text "Sad 2" ]
+            , separator defaultTheme [] []
+            , item defaultTheme [] [ text "Sad 3" ]
             ]
         ]
 

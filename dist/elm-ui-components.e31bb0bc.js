@@ -8444,6 +8444,290 @@ var author$project$Modal$modal = F5(
 					inner)
 				]));
 	});
+var author$project$Navbar$defaultNavbar = {
+	kind: author$project$Theme$Primary,
+	size: author$project$Theme$Medium,
+	text: rtfeldman$elm_css$Css$hex('#FFF'),
+	title: ''
+};
+var rtfeldman$elm_css$Css$bold = {fontWeight: rtfeldman$elm_css$Css$Structure$Compatible, value: 'bold'};
+var rtfeldman$elm_css$Css$fontWeight = function (_n0) {
+	var value = _n0.value;
+	return A2(rtfeldman$elm_css$Css$property, 'font-weight', value);
+};
+var rtfeldman$elm_css$Css$margin2 = rtfeldman$elm_css$Css$prop2('margin');
+var rtfeldman$elm_css$Css$prop4 = F5(
+	function (key, argA, argB, argC, argD) {
+		return A2(
+			rtfeldman$elm_css$Css$property,
+			key,
+			A2(
+				elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[argA.value, argB.value, argC.value, argD.value])));
+	});
+var rtfeldman$elm_css$Css$textShadow4 = rtfeldman$elm_css$Css$prop4('text-shadow');
+var author$project$Navbar$item = function (theme) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$styled,
+		rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				A4(
+				rtfeldman$elm_css$Css$textShadow4,
+				rtfeldman$elm_css$Css$zero,
+				rtfeldman$elm_css$Css$px(1),
+				rtfeldman$elm_css$Css$zero,
+				A4(rtfeldman$elm_css$Css$rgba, 0, 0, 0, 0.3)),
+				rtfeldman$elm_css$Css$color(
+				rtfeldman$elm_css$Css$hex('#FFF')),
+				A2(
+				rtfeldman$elm_css$Css$margin2,
+				rtfeldman$elm_css$Css$zero,
+				rtfeldman$elm_css$Css$px(2)),
+				rtfeldman$elm_css$Css$fontSize(
+				rtfeldman$elm_css$Css$px(18)),
+				rtfeldman$elm_css$Css$fontWeight(rtfeldman$elm_css$Css$bold)
+			]));
+};
+var elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var elm$core$Basics$round = _Basics_round;
+var rtfeldman$elm_css$Css$rgb = F3(
+	function (r, g, b) {
+		return {
+			alpha: 1,
+			blue: b,
+			color: rtfeldman$elm_css$Css$Structure$Compatible,
+			green: g,
+			red: r,
+			value: A2(
+				rtfeldman$elm_css$Css$cssFunction,
+				'rgb',
+				A2(
+					elm$core$List$map,
+					elm$core$String$fromInt,
+					_List_fromArray(
+						[r, g, b])))
+		};
+	});
+var author$project$Navbar$lighten = F2(
+	function (color, amount) {
+		var r = A2(
+			elm$core$Basics$min,
+			255,
+			elm$core$Basics$round(color.red + (amount * color.red)));
+		var g = A2(
+			elm$core$Basics$min,
+			255,
+			elm$core$Basics$round(color.green + (amount * color.green)));
+		var b = A2(
+			elm$core$Basics$min,
+			255,
+			elm$core$Basics$round(color.blue + (amount * color.blue)));
+		return A3(rtfeldman$elm_css$Css$rgb, r, g, b);
+	});
+var rtfeldman$elm_css$Css$flex = rtfeldman$elm_css$Css$prop1('flex');
+var author$project$Navbar$spacer = A2(
+	rtfeldman$elm_css$Html$Styled$styled,
+	rtfeldman$elm_css$Html$Styled$div,
+	_List_fromArray(
+		[
+			rtfeldman$elm_css$Css$flex(
+			rtfeldman$elm_css$Css$int(1))
+		]));
+var author$project$Navbar$title = A2(
+	rtfeldman$elm_css$Html$Styled$styled,
+	rtfeldman$elm_css$Html$Styled$div,
+	_List_fromArray(
+		[
+			A4(
+			rtfeldman$elm_css$Css$textShadow4,
+			rtfeldman$elm_css$Css$zero,
+			rtfeldman$elm_css$Css$px(1),
+			rtfeldman$elm_css$Css$zero,
+			A4(rtfeldman$elm_css$Css$rgba, 0, 0, 0, 0.3)),
+			rtfeldman$elm_css$Css$color(
+			rtfeldman$elm_css$Css$hex('#FFF')),
+			A2(
+			rtfeldman$elm_css$Css$margin2,
+			rtfeldman$elm_css$Css$zero,
+			rtfeldman$elm_css$Css$px(2)),
+			rtfeldman$elm_css$Css$fontSize(
+			rtfeldman$elm_css$Css$px(18)),
+			rtfeldman$elm_css$Css$fontWeight(rtfeldman$elm_css$Css$bold)
+		]));
+var rtfeldman$elm_css$Css$backgroundImage = rtfeldman$elm_css$Css$prop1('background-image');
+var rtfeldman$elm_css$Css$prop5 = F6(
+	function (key, argA, argB, argC, argD, argE) {
+		return A2(
+			rtfeldman$elm_css$Css$property,
+			key,
+			A2(
+				elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[argA.value, argB.value, argC.value, argD.value, argE.value])));
+	});
+var rtfeldman$elm_css$Css$boxShadow5 = rtfeldman$elm_css$Css$prop5('box-shadow');
+var rtfeldman$elm_css$Css$collectStops = elm$core$List$map(
+	function (_n0) {
+		var c = _n0.a;
+		var len = _n0.b;
+		return A2(
+			elm$core$String$append,
+			c.value,
+			A2(
+				elm$core$Maybe$withDefault,
+				'',
+				A2(
+					elm$core$Maybe$map,
+					A2(
+						elm$core$Basics$composeL,
+						elm$core$String$cons(
+							_Utils_chr(' ')),
+						function ($) {
+							return $.value;
+						}),
+					len)));
+	});
+var rtfeldman$elm_css$Css$linearGradient = F3(
+	function (firstStop, secondStop, otherStops) {
+		return {
+			backgroundImage: rtfeldman$elm_css$Css$Structure$Compatible,
+			listStyleTypeOrPositionOrImage: rtfeldman$elm_css$Css$Structure$Compatible,
+			value: A2(
+				rtfeldman$elm_css$Css$cssFunction,
+				'linear-gradient',
+				rtfeldman$elm_css$Css$collectStops(
+					_Utils_ap(
+						_List_fromArray(
+							[firstStop, secondStop]),
+						otherStops)))
+		};
+	});
+var rtfeldman$elm_css$Css$relative = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'relative'};
+var rtfeldman$elm_css$Css$stop = function (c) {
+	return _Utils_Tuple2(c, elm$core$Maybe$Nothing);
+};
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
+	return {$: 'Unstyled', a: a};
+};
+var rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
+	return rtfeldman$elm_css$VirtualDom$Styled$Unstyled(
+		elm$virtual_dom$VirtualDom$text(str));
+};
+var rtfeldman$elm_css$Html$Styled$text = rtfeldman$elm_css$VirtualDom$Styled$text;
+var author$project$Navbar$navbar = F4(
+	function (theme, model, attr, inner) {
+		var bg = function () {
+			var _n2 = model.kind;
+			switch (_n2.$) {
+				case 'Primary':
+					return theme.primary;
+				case 'Secondary':
+					return theme.secondary;
+				case 'Warning':
+					return theme.warning;
+				case 'Success':
+					return theme.success;
+				default:
+					return theme.danger;
+			}
+		}();
+		var _n0 = function () {
+			var _n1 = model.size;
+			switch (_n1.$) {
+				case 'Small':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(12),
+						rtfeldman$elm_css$Css$px(30));
+				case 'Medium':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(24),
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(60));
+				default:
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(30),
+						rtfeldman$elm_css$Css$px(22),
+						rtfeldman$elm_css$Css$px(90));
+			}
+		}();
+		var p = _n0.a;
+		var fs = _n0.b;
+		var h = _n0.c;
+		return A4(
+			rtfeldman$elm_css$Html$Styled$styled,
+			rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					rtfeldman$elm_css$Css$color(model.text),
+					rtfeldman$elm_css$Css$height(h),
+					rtfeldman$elm_css$Css$fontSize(fs),
+					rtfeldman$elm_css$Css$fontFamilies(theme.font),
+					A2(
+					rtfeldman$elm_css$Css$padding2,
+					rtfeldman$elm_css$Css$zero,
+					rtfeldman$elm_css$Css$px(20)),
+					rtfeldman$elm_css$Css$zIndex(
+					rtfeldman$elm_css$Css$int(50)),
+					rtfeldman$elm_css$Css$position(rtfeldman$elm_css$Css$relative),
+					rtfeldman$elm_css$Css$displayFlex,
+					rtfeldman$elm_css$Css$backgroundImage(
+					A3(
+						rtfeldman$elm_css$Css$linearGradient,
+						rtfeldman$elm_css$Css$stop(
+							A2(author$project$Navbar$lighten, theme.primary, 3.5e-2)),
+						rtfeldman$elm_css$Css$stop(theme.primary),
+						_List_Nil)),
+					rtfeldman$elm_css$Css$alignItems(rtfeldman$elm_css$Css$center),
+					A5(
+					rtfeldman$elm_css$Css$boxShadow5,
+					rtfeldman$elm_css$Css$zero,
+					rtfeldman$elm_css$Css$px(2),
+					rtfeldman$elm_css$Css$px(3),
+					rtfeldman$elm_css$Css$zero,
+					A4(rtfeldman$elm_css$Css$rgba, 0, 0, 0, 0.1))
+				]),
+			attr,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						A2(
+						author$project$Navbar$title,
+						_List_Nil,
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Html$Styled$text(model.title)
+							])),
+						A2(author$project$Navbar$spacer, _List_Nil, _List_Nil)
+					]),
+				inner));
+	});
+var author$project$Navbar$separator = function (theme) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$styled,
+		rtfeldman$elm_css$Html$Styled$div,
+		_List_fromArray(
+			[
+				rtfeldman$elm_css$Css$backgroundColor(
+				A2(author$project$Navbar$lighten, theme.primary, 0.1)),
+				A2(
+				rtfeldman$elm_css$Css$margin2,
+				rtfeldman$elm_css$Css$zero,
+				rtfeldman$elm_css$Css$px(8)),
+				rtfeldman$elm_css$Css$height(
+				rtfeldman$elm_css$Css$px(40)),
+				rtfeldman$elm_css$Css$width(
+				rtfeldman$elm_css$Css$px(2))
+			]));
+};
 var author$project$Selector$defaultSelector = {
 	kind: author$project$Theme$Primary,
 	open: false,
@@ -8473,30 +8757,9 @@ var rtfeldman$elm_css$Css$hidden = {borderStyle: rtfeldman$elm_css$Css$Structure
 var rtfeldman$elm_css$Css$hover = rtfeldman$elm_css$Css$pseudoClass('hover');
 var rtfeldman$elm_css$Css$noWrap = {flexDirectionOrWrap: rtfeldman$elm_css$Css$Structure$Compatible, flexWrap: rtfeldman$elm_css$Css$Structure$Compatible, value: 'nowrap', whiteSpace: rtfeldman$elm_css$Css$Structure$Compatible};
 var rtfeldman$elm_css$Css$overflow = rtfeldman$elm_css$Css$prop1('overflow');
-var rtfeldman$elm_css$Css$prop4 = F5(
-	function (key, argA, argB, argC, argD) {
-		return A2(
-			rtfeldman$elm_css$Css$property,
-			key,
-			A2(
-				elm$core$String$join,
-				' ',
-				_List_fromArray(
-					[argA.value, argB.value, argC.value, argD.value])));
-	});
 var rtfeldman$elm_css$Css$padding4 = rtfeldman$elm_css$Css$prop4('padding');
-var rtfeldman$elm_css$Css$relative = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'relative'};
 var rtfeldman$elm_css$Css$textOverflow = rtfeldman$elm_css$Css$prop1('text-overflow');
 var rtfeldman$elm_css$Css$whiteSpace = rtfeldman$elm_css$Css$prop1('white-space');
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
-	return {$: 'Unstyled', a: a};
-};
-var rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
-	return rtfeldman$elm_css$VirtualDom$Styled$Unstyled(
-		elm$virtual_dom$VirtualDom$text(str));
-};
-var rtfeldman$elm_css$Html$Styled$text = rtfeldman$elm_css$VirtualDom$Styled$text;
 var author$project$Selector$dropdownItem = F4(
 	function (theme, model, option, attrs) {
 		var selectedStyles = _Utils_eq(option.key, model.selected.key) ? _List_fromArray(
@@ -8543,18 +8806,6 @@ var author$project$Selector$dropdownItem = F4(
 					rtfeldman$elm_css$Html$Styled$text(option.value)
 				]));
 	});
-var rtfeldman$elm_css$Css$prop5 = F6(
-	function (key, argA, argB, argC, argD, argE) {
-		return A2(
-			rtfeldman$elm_css$Css$property,
-			key,
-			A2(
-				elm$core$String$join,
-				' ',
-				_List_fromArray(
-					[argA.value, argB.value, argC.value, argD.value, argE.value])));
-	});
-var rtfeldman$elm_css$Css$boxShadow5 = rtfeldman$elm_css$Css$prop5('box-shadow');
 var rtfeldman$elm_css$Css$initial = {alignItems: rtfeldman$elm_css$Css$Structure$Compatible, all: rtfeldman$elm_css$Css$Structure$Compatible, backgroundAttachment: rtfeldman$elm_css$Css$Structure$Compatible, backgroundBlendMode: rtfeldman$elm_css$Css$Structure$Compatible, backgroundImage: rtfeldman$elm_css$Css$Structure$Compatible, backgroundOrigin: rtfeldman$elm_css$Css$Structure$Compatible, backgroundRepeat: rtfeldman$elm_css$Css$Structure$Compatible, backgroundRepeatShorthand: rtfeldman$elm_css$Css$Structure$Compatible, borderStyle: rtfeldman$elm_css$Css$Structure$Compatible, boxSizing: rtfeldman$elm_css$Css$Structure$Compatible, color: rtfeldman$elm_css$Css$Structure$Compatible, cursor: rtfeldman$elm_css$Css$Structure$Compatible, display: rtfeldman$elm_css$Css$Structure$Compatible, flexBasis: rtfeldman$elm_css$Css$Structure$Compatible, flexDirection: rtfeldman$elm_css$Css$Structure$Compatible, flexDirectionOrWrap: rtfeldman$elm_css$Css$Structure$Compatible, flexWrap: rtfeldman$elm_css$Css$Structure$Compatible, fontFamily: rtfeldman$elm_css$Css$Structure$Compatible, fontSize: rtfeldman$elm_css$Css$Structure$Compatible, fontStyle: rtfeldman$elm_css$Css$Structure$Compatible, fontVariant: rtfeldman$elm_css$Css$Structure$Compatible, fontWeight: rtfeldman$elm_css$Css$Structure$Compatible, intOrAuto: rtfeldman$elm_css$Css$Structure$Compatible, justifyContent: rtfeldman$elm_css$Css$Structure$Compatible, keyframes: rtfeldman$elm_css$Css$Structure$Compatible, length: rtfeldman$elm_css$Css$Structure$Compatible, lengthOrAuto: rtfeldman$elm_css$Css$Structure$Compatible, lengthOrAutoOrCoverOrContain: rtfeldman$elm_css$Css$Structure$Compatible, lengthOrMinMaxDimension: rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNone: rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNoneOrMinMaxDimension: rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNumber: rtfeldman$elm_css$Css$Structure$Compatible, lengthOrNumberOrAutoOrNoneOrContent: rtfeldman$elm_css$Css$Structure$Compatible, listStylePosition: rtfeldman$elm_css$Css$Structure$Compatible, listStyleType: rtfeldman$elm_css$Css$Structure$Compatible, listStyleTypeOrPositionOrImage: rtfeldman$elm_css$Css$Structure$Compatible, none: rtfeldman$elm_css$Css$Structure$Compatible, number: rtfeldman$elm_css$Css$Structure$Compatible, numericValue: 0, outline: rtfeldman$elm_css$Css$Structure$Compatible, overflow: rtfeldman$elm_css$Css$Structure$Compatible, pointerEvents: rtfeldman$elm_css$Css$Structure$Compatible, tableLayout: rtfeldman$elm_css$Css$Structure$Compatible, textDecorationLine: rtfeldman$elm_css$Css$Structure$Compatible, textDecorationStyle: rtfeldman$elm_css$Css$Structure$Compatible, textIndent: rtfeldman$elm_css$Css$Structure$Compatible, textRendering: rtfeldman$elm_css$Css$Structure$Compatible, textTransform: rtfeldman$elm_css$Css$Structure$Compatible, touchAction: rtfeldman$elm_css$Css$Structure$Compatible, unitLabel: '', units: rtfeldman$elm_css$Css$Internal$IncompatibleUnits, value: 'initial', visibility: rtfeldman$elm_css$Css$Structure$Compatible, whiteSpace: rtfeldman$elm_css$Css$Structure$Compatible};
 var rtfeldman$elm_css$Css$inherit = _Utils_update(
 	rtfeldman$elm_css$Css$initial,
@@ -8660,7 +8911,6 @@ var author$project$Selector$input = F2(
 					rtfeldman$elm_css$Css$cursor(rtfeldman$elm_css$Css$pointer)
 				]));
 	});
-var rtfeldman$elm_css$Css$flex = rtfeldman$elm_css$Css$prop1('flex');
 var rtfeldman$elm_css$Css$overflowY = rtfeldman$elm_css$Css$prop1('overflow-y');
 var rtfeldman$elm_css$Css$paddingRight = rtfeldman$elm_css$Css$prop1('padding-right');
 var rtfeldman$elm_css$Css$scroll = {backgroundAttachment: rtfeldman$elm_css$Css$Structure$Compatible, blockAxisOverflow: rtfeldman$elm_css$Css$Structure$Compatible, inlineAxisOverflow: rtfeldman$elm_css$Css$Structure$Compatible, overflow: rtfeldman$elm_css$Css$Structure$Compatible, scroll: rtfeldman$elm_css$Css$Structure$Compatible, value: 'scroll'};
@@ -9261,6 +9511,50 @@ var author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								rtfeldman$elm_css$Html$Styled$text('Close it!')
+							]))
+					])),
+				A4(
+				author$project$Navbar$navbar,
+				author$project$Theme$defaultTheme,
+				_Utils_update(
+					author$project$Navbar$defaultNavbar,
+					{title: 'Hello, WORLD'}),
+				_List_fromArray(
+					[
+						rtfeldman$elm_css$Html$Styled$Attributes$css(
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Css$width(
+								rtfeldman$elm_css$Css$px(600))
+							]))
+					]),
+				_List_fromArray(
+					[
+						A3(
+						author$project$Navbar$item,
+						author$project$Theme$defaultTheme,
+						_List_Nil,
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Html$Styled$text('Sad')
+							])),
+						A3(author$project$Navbar$separator, author$project$Theme$defaultTheme, _List_Nil, _List_Nil),
+						A3(
+						author$project$Navbar$item,
+						author$project$Theme$defaultTheme,
+						_List_Nil,
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Html$Styled$text('Sad 2')
+							])),
+						A3(author$project$Navbar$separator, author$project$Theme$defaultTheme, _List_Nil, _List_Nil),
+						A3(
+						author$project$Navbar$item,
+						author$project$Theme$defaultTheme,
+						_List_Nil,
+						_List_fromArray(
+							[
+								rtfeldman$elm_css$Html$Styled$text('Sad 3')
 							]))
 					]))
 			]));
@@ -10024,7 +10318,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55592" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61698" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

@@ -339,6 +339,87 @@ var _JsArray_appendN = F3(function(n, dest, source)
 
 
 
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
+
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
+{
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
+}
+
+function _List_toArray(xs)
+{
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
+}
+
+var _List_map2 = F3(function(f, xs, ys)
+{
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map3 = F4(function(f, xs, ys, zs)
+{
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === elm$core$Basics$EQ ? 0 : ord === elm$core$Basics$LT ? -1 : 1;
+	}));
+});
+
+
+
 // LOG
 
 var _Debug_log_UNUSED = F2(function(tag, value)
@@ -819,84 +900,194 @@ function _Utils_ap(xs, ys)
 
 
 
-var _List_Nil_UNUSED = { $: 0 };
-var _List_Nil = { $: '[]' };
+// TASKS
 
-function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
-
-
-var _List_cons = F2(_List_Cons);
-
-function _List_fromArray(arr)
+function _Scheduler_succeed(value)
 {
-	var out = _List_Nil;
-	for (var i = arr.length; i--; )
-	{
-		out = _List_Cons(arr[i], out);
-	}
-	return out;
+	return {
+		$: 0,
+		a: value
+	};
 }
 
-function _List_toArray(xs)
+function _Scheduler_fail(error)
 {
-	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
-	{
-		out.push(xs.a);
-	}
-	return out;
+	return {
+		$: 1,
+		a: error
+	};
 }
 
-var _List_map2 = F3(function(f, xs, ys)
+function _Scheduler_binding(callback)
 {
-	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	return {
+		$: 2,
+		b: callback,
+		c: null
+	};
+}
+
+var _Scheduler_andThen = F2(function(callback, task)
+{
+	return {
+		$: 3,
+		b: callback,
+		d: task
+	};
+});
+
+var _Scheduler_onError = F2(function(callback, task)
+{
+	return {
+		$: 4,
+		b: callback,
+		d: task
+	};
+});
+
+function _Scheduler_receive(callback)
+{
+	return {
+		$: 5,
+		b: callback
+	};
+}
+
+
+// PROCESSES
+
+var _Scheduler_guid = 0;
+
+function _Scheduler_rawSpawn(task)
+{
+	var proc = {
+		$: 0,
+		e: _Scheduler_guid++,
+		f: task,
+		g: null,
+		h: []
+	};
+
+	_Scheduler_enqueue(proc);
+
+	return proc;
+}
+
+function _Scheduler_spawn(task)
+{
+	return _Scheduler_binding(function(callback) {
+		callback(_Scheduler_succeed(_Scheduler_rawSpawn(task)));
+	});
+}
+
+function _Scheduler_rawSend(proc, msg)
+{
+	proc.h.push(msg);
+	_Scheduler_enqueue(proc);
+}
+
+var _Scheduler_send = F2(function(proc, msg)
+{
+	return _Scheduler_binding(function(callback) {
+		_Scheduler_rawSend(proc, msg);
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+});
+
+function _Scheduler_kill(proc)
+{
+	return _Scheduler_binding(function(callback) {
+		var task = proc.f;
+		if (task.$ === 2 && task.c)
+		{
+			task.c();
+		}
+
+		proc.f = null;
+
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+}
+
+
+/* STEP PROCESSES
+
+type alias Process =
+  { $ : tag
+  , id : unique_id
+  , root : Task
+  , stack : null | { $: SUCCEED | FAIL, a: callback, b: stack }
+  , mailbox : [msg]
+  }
+
+*/
+
+
+var _Scheduler_working = false;
+var _Scheduler_queue = [];
+
+
+function _Scheduler_enqueue(proc)
+{
+	_Scheduler_queue.push(proc);
+	if (_Scheduler_working)
 	{
-		arr.push(A2(f, xs.a, ys.a));
+		return;
 	}
-	return _List_fromArray(arr);
-});
-
-var _List_map3 = F4(function(f, xs, ys, zs)
-{
-	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	_Scheduler_working = true;
+	while (proc = _Scheduler_queue.shift())
 	{
-		arr.push(A3(f, xs.a, ys.a, zs.a));
+		_Scheduler_step(proc);
 	}
-	return _List_fromArray(arr);
-});
+	_Scheduler_working = false;
+}
 
-var _List_map4 = F5(function(f, ws, xs, ys, zs)
+
+function _Scheduler_step(proc)
 {
-	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	while (proc.f)
 	{
-		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+		var rootTag = proc.f.$;
+		if (rootTag === 0 || rootTag === 1)
+		{
+			while (proc.g && proc.g.$ !== rootTag)
+			{
+				proc.g = proc.g.i;
+			}
+			if (!proc.g)
+			{
+				return;
+			}
+			proc.f = proc.g.b(proc.f.a);
+			proc.g = proc.g.i;
+		}
+		else if (rootTag === 2)
+		{
+			proc.f.c = proc.f.b(function(newRoot) {
+				proc.f = newRoot;
+				_Scheduler_enqueue(proc);
+			});
+			return;
+		}
+		else if (rootTag === 5)
+		{
+			if (proc.h.length === 0)
+			{
+				return;
+			}
+			proc.f = proc.f.b(proc.h.shift());
+		}
+		else // if (rootTag === 3 || rootTag === 4)
+		{
+			proc.g = {
+				$: rootTag === 3 ? 0 : 1,
+				b: proc.f.b,
+				i: proc.g
+			};
+			proc.f = proc.f.d;
+		}
 	}
-	return _List_fromArray(arr);
-});
-
-var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
-{
-	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
-	{
-		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
-	}
-	return _List_fromArray(arr);
-});
-
-var _List_sortBy = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		return _Utils_cmp(f(a), f(b));
-	}));
-});
-
-var _List_sortWith = F2(function(f, xs)
-{
-	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
-		var ord = A2(f, a, b);
-		return ord === elm$core$Basics$EQ ? 0 : ord === elm$core$Basics$LT ? -1 : 1;
-	}));
-});
+}
 
 
 
@@ -1751,197 +1942,6 @@ var _Json_encodeNull = _Json_wrap(null);
 
 
 
-// TASKS
-
-function _Scheduler_succeed(value)
-{
-	return {
-		$: 0,
-		a: value
-	};
-}
-
-function _Scheduler_fail(error)
-{
-	return {
-		$: 1,
-		a: error
-	};
-}
-
-function _Scheduler_binding(callback)
-{
-	return {
-		$: 2,
-		b: callback,
-		c: null
-	};
-}
-
-var _Scheduler_andThen = F2(function(callback, task)
-{
-	return {
-		$: 3,
-		b: callback,
-		d: task
-	};
-});
-
-var _Scheduler_onError = F2(function(callback, task)
-{
-	return {
-		$: 4,
-		b: callback,
-		d: task
-	};
-});
-
-function _Scheduler_receive(callback)
-{
-	return {
-		$: 5,
-		b: callback
-	};
-}
-
-
-// PROCESSES
-
-var _Scheduler_guid = 0;
-
-function _Scheduler_rawSpawn(task)
-{
-	var proc = {
-		$: 0,
-		e: _Scheduler_guid++,
-		f: task,
-		g: null,
-		h: []
-	};
-
-	_Scheduler_enqueue(proc);
-
-	return proc;
-}
-
-function _Scheduler_spawn(task)
-{
-	return _Scheduler_binding(function(callback) {
-		callback(_Scheduler_succeed(_Scheduler_rawSpawn(task)));
-	});
-}
-
-function _Scheduler_rawSend(proc, msg)
-{
-	proc.h.push(msg);
-	_Scheduler_enqueue(proc);
-}
-
-var _Scheduler_send = F2(function(proc, msg)
-{
-	return _Scheduler_binding(function(callback) {
-		_Scheduler_rawSend(proc, msg);
-		callback(_Scheduler_succeed(_Utils_Tuple0));
-	});
-});
-
-function _Scheduler_kill(proc)
-{
-	return _Scheduler_binding(function(callback) {
-		var task = proc.f;
-		if (task.$ === 2 && task.c)
-		{
-			task.c();
-		}
-
-		proc.f = null;
-
-		callback(_Scheduler_succeed(_Utils_Tuple0));
-	});
-}
-
-
-/* STEP PROCESSES
-
-type alias Process =
-  { $ : tag
-  , id : unique_id
-  , root : Task
-  , stack : null | { $: SUCCEED | FAIL, a: callback, b: stack }
-  , mailbox : [msg]
-  }
-
-*/
-
-
-var _Scheduler_working = false;
-var _Scheduler_queue = [];
-
-
-function _Scheduler_enqueue(proc)
-{
-	_Scheduler_queue.push(proc);
-	if (_Scheduler_working)
-	{
-		return;
-	}
-	_Scheduler_working = true;
-	while (proc = _Scheduler_queue.shift())
-	{
-		_Scheduler_step(proc);
-	}
-	_Scheduler_working = false;
-}
-
-
-function _Scheduler_step(proc)
-{
-	while (proc.f)
-	{
-		var rootTag = proc.f.$;
-		if (rootTag === 0 || rootTag === 1)
-		{
-			while (proc.g && proc.g.$ !== rootTag)
-			{
-				proc.g = proc.g.i;
-			}
-			if (!proc.g)
-			{
-				return;
-			}
-			proc.f = proc.g.b(proc.f.a);
-			proc.g = proc.g.i;
-		}
-		else if (rootTag === 2)
-		{
-			proc.f.c = proc.f.b(function(newRoot) {
-				proc.f = newRoot;
-				_Scheduler_enqueue(proc);
-			});
-			return;
-		}
-		else if (rootTag === 5)
-		{
-			if (proc.h.length === 0)
-			{
-				return;
-			}
-			proc.f = proc.f.b(proc.h.shift());
-		}
-		else // if (rootTag === 3 || rootTag === 4)
-		{
-			proc.g = {
-				$: rootTag === 3 ? 0 : 1,
-				b: proc.f.b,
-				i: proc.g
-			};
-			proc.f = proc.f.d;
-		}
-	}
-}
-
-
-
 function _Process_sleep(time)
 {
 	return _Scheduler_binding(function(callback) {
@@ -2418,151 +2418,6 @@ function _Platform_mergeExportsDebug(moduleName, obj, exports)
 			: (obj[name] = exports[name]);
 	}
 }
-
-
-
-// DECODER
-
-var _File_decoder = _Json_decodePrim(function(value) {
-	// NOTE: checks if `File` exists in case this is run on node
-	return (typeof File === 'function' && value instanceof File)
-		? elm$core$Result$Ok(value)
-		: _Json_expecting('a FILE', value);
-});
-
-
-// METADATA
-
-function _File_name(file) { return file.name; }
-function _File_mime(file) { return file.type; }
-function _File_size(file) { return file.size; }
-
-function _File_lastModified(file)
-{
-	return elm$time$Time$millisToPosix(file.lastModified);
-}
-
-
-// DOWNLOAD
-
-var _File_downloadNode;
-
-function _File_getDownloadNode()
-{
-	return _File_downloadNode || (_File_downloadNode = document.createElementNS('http://www.w3.org/1999/xhtml', 'a'));
-}
-
-var _File_download = F3(function(name, mime, content)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var blob = new Blob([content], {type: mime});
-
-		// for IE10+
-		if (navigator.msSaveOrOpenBlob)
-		{
-			navigator.msSaveOrOpenBlob(blob, name);
-			return;
-		}
-
-		// for HTML5
-		var node = _File_getDownloadNode();
-		var objectUrl = URL.createObjectURL(blob);
-		node.setAttribute('href', objectUrl);
-		node.setAttribute('download', name);
-		node.dispatchEvent(new MouseEvent('click'));
-		URL.revokeObjectURL(objectUrl);
-	});
-});
-
-function _File_downloadUrl(href)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var node = _File_getDownloadNode();
-		node.setAttribute('href', href);
-		node.setAttribute('download', '');
-		node.dispatchEvent(new MouseEvent('click'));
-	});
-}
-
-
-// UPLOAD
-
-function _File_uploadOne(mimes)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var node = document.createElementNS('http://www.w3.org/1999/xhtml', 'input');
-		node.setAttribute('type', 'file');
-		node.setAttribute('accept', A2(elm$core$String$join, ',', mimes));
-		node.addEventListener('change', function(event)
-		{
-			callback(_Scheduler_succeed(event.target.files[0]));
-		});
-		node.dispatchEvent(new MouseEvent('click'));
-	});
-}
-
-function _File_uploadOneOrMore(mimes)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var node = document.createElementNS('http://www.w3.org/1999/xhtml', 'input');
-		node.setAttribute('type', 'file');
-		node.setAttribute('accept', A2(elm$core$String$join, ',', mimes));
-		node.setAttribute('multiple', '');
-		node.addEventListener('change', function(event)
-		{
-			var elmFiles = _List_fromArray(event.target.files);
-			callback(_Scheduler_succeed(_Utils_Tuple2(elmFiles.a, elmFiles.b)));
-		});
-		node.dispatchEvent(new MouseEvent('click'));
-	});
-}
-
-
-// CONTENT
-
-function _File_toString(blob)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var reader = new FileReader();
-		reader.addEventListener('loadend', function() {
-			callback(_Scheduler_succeed(reader.result));
-		});
-		reader.readAsText(blob);
-		return function() { reader.abort(); };
-	});
-}
-
-function _File_toBytes(blob)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var reader = new FileReader();
-		reader.addEventListener('loadend', function() {
-			callback(_Scheduler_succeed(new DataView(reader.result)));
-		});
-		reader.readAsArrayBuffer(blob);
-		return function() { reader.abort(); };
-	});
-}
-
-function _File_toUrl(blob)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		var reader = new FileReader();
-		reader.addEventListener('loadend', function() {
-			callback(_Scheduler_succeed(reader.result));
-		});
-		reader.readAsDataURL(blob);
-		return function() { reader.abort(); };
-	});
-}
-
 
 
 
@@ -4124,43 +3979,6 @@ function _VirtualDom_dekey(keyedNode)
 
 
 
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
-
-
-
 
 // ELEMENT
 
@@ -4599,10 +4417,225 @@ function _Browser_load(url)
 		}
 	}));
 }
-var elm$core$Basics$False = {$: 'False'};
+
+
+
+// DECODER
+
+var _File_decoder = _Json_decodePrim(function(value) {
+	// NOTE: checks if `File` exists in case this is run on node
+	return (typeof File === 'function' && value instanceof File)
+		? elm$core$Result$Ok(value)
+		: _Json_expecting('a FILE', value);
+});
+
+
+// METADATA
+
+function _File_name(file) { return file.name; }
+function _File_mime(file) { return file.type; }
+function _File_size(file) { return file.size; }
+
+function _File_lastModified(file)
+{
+	return elm$time$Time$millisToPosix(file.lastModified);
+}
+
+
+// DOWNLOAD
+
+var _File_downloadNode;
+
+function _File_getDownloadNode()
+{
+	return _File_downloadNode || (_File_downloadNode = document.createElementNS('http://www.w3.org/1999/xhtml', 'a'));
+}
+
+var _File_download = F3(function(name, mime, content)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var blob = new Blob([content], {type: mime});
+
+		// for IE10+
+		if (navigator.msSaveOrOpenBlob)
+		{
+			navigator.msSaveOrOpenBlob(blob, name);
+			return;
+		}
+
+		// for HTML5
+		var node = _File_getDownloadNode();
+		var objectUrl = URL.createObjectURL(blob);
+		node.setAttribute('href', objectUrl);
+		node.setAttribute('download', name);
+		node.dispatchEvent(new MouseEvent('click'));
+		URL.revokeObjectURL(objectUrl);
+	});
+});
+
+function _File_downloadUrl(href)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = _File_getDownloadNode();
+		node.setAttribute('href', href);
+		node.setAttribute('download', '');
+		node.dispatchEvent(new MouseEvent('click'));
+	});
+}
+
+
+// UPLOAD
+
+function _File_uploadOne(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = document.createElementNS('http://www.w3.org/1999/xhtml', 'input');
+		node.setAttribute('type', 'file');
+		node.setAttribute('accept', A2(elm$core$String$join, ',', mimes));
+		node.addEventListener('change', function(event)
+		{
+			callback(_Scheduler_succeed(event.target.files[0]));
+		});
+		node.dispatchEvent(new MouseEvent('click'));
+	});
+}
+
+function _File_uploadOneOrMore(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = document.createElementNS('http://www.w3.org/1999/xhtml', 'input');
+		node.setAttribute('type', 'file');
+		node.setAttribute('accept', A2(elm$core$String$join, ',', mimes));
+		node.setAttribute('multiple', '');
+		node.addEventListener('change', function(event)
+		{
+			var elmFiles = _List_fromArray(event.target.files);
+			callback(_Scheduler_succeed(_Utils_Tuple2(elmFiles.a, elmFiles.b)));
+		});
+		node.dispatchEvent(new MouseEvent('click'));
+	});
+}
+
+
+// CONTENT
+
+function _File_toString(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsText(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toBytes(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(new DataView(reader.result)));
+		});
+		reader.readAsArrayBuffer(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toUrl(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsDataURL(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+var elm$browser$Browser$External = function (a) {
+	return {$: 'External', a: a};
+};
+var elm$browser$Browser$Internal = function (a) {
+	return {$: 'Internal', a: a};
+};
+var elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var elm$core$Basics$never = function (_n0) {
+	never:
+	while (true) {
+		var nvr = _n0.a;
+		var $temp$_n0 = nvr;
+		_n0 = $temp$_n0;
+		continue never;
+	}
+};
+var elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
 var elm$core$Maybe$Nothing = {$: 'Nothing'};
-var elm$core$Basics$EQ = {$: 'EQ'};
-var elm$core$Basics$LT = {$: 'LT'};
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$True = {$: 'True'};
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
 var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var elm$core$Array$foldr = F3(
 	function (func, baseCase, _n0) {
@@ -4624,6 +4657,8 @@ var elm$core$Array$foldr = F3(
 			A3(elm$core$Elm$JsArray$foldr, func, baseCase, tail),
 			tree);
 	});
+var elm$core$Basics$EQ = {$: 'EQ'};
+var elm$core$Basics$LT = {$: 'LT'};
 var elm$core$List$cons = _List_cons;
 var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
@@ -4681,34 +4716,137 @@ var elm$core$Set$toList = function (_n0) {
 	var dict = _n0.a;
 	return elm$core$Dict$keys(dict);
 };
-var author$project$Main$initialModel = {
-	checked: false,
-	input: '',
-	modalOpen: false,
-	options: _List_fromArray(
-		[
-			{key: 'Test', value: 'Test1'},
-			{key: 'Test 2', value: 'Test2'},
-			{key: 'Test 3', value: 'Tes'},
-			{key: 'Test 4', value: 'Tes4'},
-			{key: 'Test 5', value: 'Test5'},
-			{key: 'Test 6', value: 'Test6'},
-			{key: 'Test 7', value: 'Test7'},
-			{key: 'Test 8', value: 'Test8'},
-			{key: 'Test 9', value: 'Test9'},
-			{key: 'Test 10', value: 'Test10'}
-		]),
-	selected: {key: '', value: ''},
-	selectedFile: elm$core$Maybe$Nothing,
-	selectedOpen: false
+var elm$core$Task$succeed = _Scheduler_succeed;
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$Basics$add = _Basics_add;
+var elm$core$Basics$gt = _Utils_gt;
+var elm$core$List$foldl = F3(
+	function (func, acc, list) {
+		foldl:
+		while (true) {
+			if (!list.b) {
+				return acc;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var $temp$func = func,
+					$temp$acc = A2(func, x, acc),
+					$temp$list = xs;
+				func = $temp$func;
+				acc = $temp$acc;
+				list = $temp$list;
+				continue foldl;
+			}
+		}
+	});
+var elm$core$List$reverse = function (list) {
+	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
 };
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
+var elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							elm$core$List$foldl,
+							fn,
+							acc,
+							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$Basics$apR = F2(
+	function (x, f) {
+		return f(x);
+	});
+var elm$core$Task$andThen = _Scheduler_andThen;
+var elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var elm$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return A2(
+					elm$core$Task$andThen,
+					function (b) {
+						return elm$core$Task$succeed(
+							A2(func, a, b));
+					},
+					taskB);
+			},
+			taskA);
+	});
+var elm$core$Task$sequence = function (tasks) {
+	return A3(
+		elm$core$List$foldr,
+		elm$core$Task$map2(elm$core$List$cons),
+		elm$core$Task$succeed(_List_Nil),
+		tasks);
 };
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
@@ -4733,28 +4871,6 @@ var elm$core$Array$SubTree = function (a) {
 	return {$: 'SubTree', a: a};
 };
 var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
-var elm$core$List$foldl = F3(
-	function (func, acc, list) {
-		foldl:
-		while (true) {
-			if (!list.b) {
-				return acc;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				var $temp$func = func,
-					$temp$acc = A2(func, x, acc),
-					$temp$list = xs;
-				func = $temp$func;
-				acc = $temp$acc;
-				list = $temp$list;
-				continue foldl;
-			}
-		}
-	});
-var elm$core$List$reverse = function (list) {
-	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
-};
 var elm$core$Array$compressNodes = F2(
 	function (nodes, acc) {
 		compressNodes:
@@ -4777,10 +4893,6 @@ var elm$core$Array$compressNodes = F2(
 			}
 		}
 	});
-var elm$core$Basics$apR = F2(
-	function (x, f) {
-		return f(x);
-	});
 var elm$core$Basics$eq = _Utils_equal;
 var elm$core$Tuple$first = function (_n0) {
 	var x = _n0.a;
@@ -4802,13 +4914,11 @@ var elm$core$Array$treeFromBuilder = F2(
 			}
 		}
 	});
-var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
 	});
 var elm$core$Basics$floor = _Basics_floor;
-var elm$core$Basics$gt = _Utils_gt;
 var elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
@@ -4881,9 +4991,6 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -5095,129 +5202,6 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 			}
 		}
 	});
-var elm$core$Platform$Cmd$batch = _Platform_batch;
-var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
-var author$project$Main$init = function (_n0) {
-	return _Utils_Tuple2(author$project$Main$initialModel, elm$core$Platform$Cmd$none);
-};
-var elm$core$Platform$Sub$batch = _Platform_batch;
-var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
-var author$project$Main$subscriptions = function (model) {
-	return elm$core$Platform$Sub$none;
-};
-var author$project$Main$FileLoaded = function (a) {
-	return {$: 'FileLoaded', a: a};
-};
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$succeed = _Scheduler_succeed;
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							elm$core$List$foldl,
-							fn,
-							acc,
-							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
-var elm$core$Task$andThen = _Scheduler_andThen;
-var elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
-	});
-var elm$core$Task$map2 = F3(
-	function (func, taskA, taskB) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return A2(
-					elm$core$Task$andThen,
-					function (b) {
-						return elm$core$Task$succeed(
-							A2(func, a, b));
-					},
-					taskB);
-			},
-			taskA);
-	});
-var elm$core$Task$sequence = function (tasks) {
-	return A3(
-		elm$core$List$foldr,
-		elm$core$Task$map2(elm$core$List$cons),
-		elm$core$Task$succeed(_List_Nil),
-		tasks);
-};
 var elm$core$Platform$sendToApp = _Platform_sendToApp;
 var elm$core$Task$spawnCmd = F2(
 	function (router, _n0) {
@@ -5259,6 +5243,188 @@ var elm$core$Task$perform = F2(
 			elm$core$Task$Perform(
 				A2(elm$core$Task$map, toMessage, task)));
 	});
+var elm$json$Json$Decode$map = _Json_map1;
+var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
+	switch (handler.$) {
+		case 'Normal':
+			return 0;
+		case 'MayStopPropagation':
+			return 1;
+		case 'MayPreventDefault':
+			return 2;
+		default:
+			return 3;
+	}
+};
+var elm$core$String$length = _String_length;
+var elm$core$String$slice = _String_slice;
+var elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			elm$core$String$slice,
+			n,
+			elm$core$String$length(string),
+			string);
+	});
+var elm$core$String$startsWith = _String_startsWith;
+var elm$url$Url$Http = {$: 'Http'};
+var elm$url$Url$Https = {$: 'Https'};
+var elm$core$String$indexes = _String_indexes;
+var elm$core$String$isEmpty = function (string) {
+	return string === '';
+};
+var elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
+	});
+var elm$core$String$contains = _String_contains;
+var elm$core$String$toInt = _String_toInt;
+var elm$url$Url$Url = F6(
+	function (protocol, host, port_, path, query, fragment) {
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
+	});
+var elm$url$Url$chompBeforePath = F5(
+	function (protocol, path, params, frag, str) {
+		if (elm$core$String$isEmpty(str) || A2(elm$core$String$contains, '@', str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, ':', str);
+			if (!_n0.b) {
+				return elm$core$Maybe$Just(
+					A6(elm$url$Url$Url, protocol, str, elm$core$Maybe$Nothing, path, params, frag));
+			} else {
+				if (!_n0.b.b) {
+					var i = _n0.a;
+					var _n1 = elm$core$String$toInt(
+						A2(elm$core$String$dropLeft, i + 1, str));
+					if (_n1.$ === 'Nothing') {
+						return elm$core$Maybe$Nothing;
+					} else {
+						var port_ = _n1;
+						return elm$core$Maybe$Just(
+							A6(
+								elm$url$Url$Url,
+								protocol,
+								A2(elm$core$String$left, i, str),
+								port_,
+								path,
+								params,
+								frag));
+					}
+				} else {
+					return elm$core$Maybe$Nothing;
+				}
+			}
+		}
+	});
+var elm$url$Url$chompBeforeQuery = F4(
+	function (protocol, params, frag, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '/', str);
+			if (!_n0.b) {
+				return A5(elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
+			} else {
+				var i = _n0.a;
+				return A5(
+					elm$url$Url$chompBeforePath,
+					protocol,
+					A2(elm$core$String$dropLeft, i, str),
+					params,
+					frag,
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$chompBeforeFragment = F3(
+	function (protocol, frag, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '?', str);
+			if (!_n0.b) {
+				return A4(elm$url$Url$chompBeforeQuery, protocol, elm$core$Maybe$Nothing, frag, str);
+			} else {
+				var i = _n0.a;
+				return A4(
+					elm$url$Url$chompBeforeQuery,
+					protocol,
+					elm$core$Maybe$Just(
+						A2(elm$core$String$dropLeft, i + 1, str)),
+					frag,
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$chompAfterProtocol = F2(
+	function (protocol, str) {
+		if (elm$core$String$isEmpty(str)) {
+			return elm$core$Maybe$Nothing;
+		} else {
+			var _n0 = A2(elm$core$String$indexes, '#', str);
+			if (!_n0.b) {
+				return A3(elm$url$Url$chompBeforeFragment, protocol, elm$core$Maybe$Nothing, str);
+			} else {
+				var i = _n0.a;
+				return A3(
+					elm$url$Url$chompBeforeFragment,
+					protocol,
+					elm$core$Maybe$Just(
+						A2(elm$core$String$dropLeft, i + 1, str)),
+					A2(elm$core$String$left, i, str));
+			}
+		}
+	});
+var elm$url$Url$fromString = function (str) {
+	return A2(elm$core$String$startsWith, 'http://', str) ? A2(
+		elm$url$Url$chompAfterProtocol,
+		elm$url$Url$Http,
+		A2(elm$core$String$dropLeft, 7, str)) : (A2(elm$core$String$startsWith, 'https://', str) ? A2(
+		elm$url$Url$chompAfterProtocol,
+		elm$url$Url$Https,
+		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
+};
+var elm$browser$Browser$element = _Browser_element;
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var elm$core$Platform$Cmd$batch = _Platform_batch;
+var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
+var nathanjohnson320$elm_ui_components$Main$initialModel = {
+	checked: false,
+	input: '',
+	modalOpen: false,
+	options: _List_fromArray(
+		[
+			{key: 'Test', value: 'Test1'},
+			{key: 'Test 2', value: 'Test2'},
+			{key: 'Test 3', value: 'Tes'},
+			{key: 'Test 4', value: 'Tes4'},
+			{key: 'Test 5', value: 'Test5'},
+			{key: 'Test 6', value: 'Test6'},
+			{key: 'Test 7', value: 'Test7'},
+			{key: 'Test 8', value: 'Test8'},
+			{key: 'Test 9', value: 'Test9'},
+			{key: 'Test 10', value: 'Test10'}
+		]),
+	selected: {key: '', value: ''},
+	selectedFile: elm$core$Maybe$Nothing,
+	selectedOpen: false
+};
+var nathanjohnson320$elm_ui_components$Main$init = function (_n0) {
+	return _Utils_Tuple2(nathanjohnson320$elm_ui_components$Main$initialModel, elm$core$Platform$Cmd$none);
+};
+var elm$core$Platform$Sub$batch = _Platform_batch;
+var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
+var nathanjohnson320$elm_ui_components$Main$subscriptions = function (model) {
+	return elm$core$Platform$Sub$none;
+};
+var elm$core$Basics$not = _Basics_not;
 var elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -5270,13 +5436,15 @@ var elm$file$File$Select$file = F2(
 			toMsg,
 			_File_uploadOne(mimes));
 	});
-var author$project$Main$selectFile = A2(
+var nathanjohnson320$elm_ui_components$Main$FileLoaded = function (a) {
+	return {$: 'FileLoaded', a: a};
+};
+var nathanjohnson320$elm_ui_components$Main$selectFile = A2(
 	elm$file$File$Select$file,
 	_List_fromArray(
 		['text/plain']),
-	author$project$Main$FileLoaded);
-var elm$core$Basics$not = _Basics_not;
-var author$project$Main$update = F2(
+	nathanjohnson320$elm_ui_components$Main$FileLoaded);
+var nathanjohnson320$elm_ui_components$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'Input':
@@ -5307,7 +5475,7 @@ var author$project$Main$update = F2(
 						{modalOpen: direction}),
 					elm$core$Platform$Cmd$none);
 			case 'SelectFile':
-				return _Utils_Tuple2(model, author$project$Main$selectFile);
+				return _Utils_Tuple2(model, nathanjohnson320$elm_ui_components$Main$selectFile);
 			case 'FileLoaded':
 				var file = msg.a;
 				return _Utils_Tuple2(
@@ -5418,21 +5586,6 @@ var rtfeldman$elm_css$VirtualDom$Styled$node = rtfeldman$elm_css$VirtualDom$Styl
 var rtfeldman$elm_css$Html$Styled$node = rtfeldman$elm_css$VirtualDom$Styled$node;
 var rtfeldman$elm_css$Html$Styled$button = rtfeldman$elm_css$Html$Styled$node('button');
 var elm$json$Json$Encode$string = _Json_wrap;
-var elm$json$Json$Decode$map = _Json_map1;
-var elm$json$Json$Decode$map2 = _Json_map2;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
-	switch (handler.$) {
-		case 'Normal':
-			return 0;
-		case 'MayStopPropagation':
-			return 1;
-		case 'MayPreventDefault':
-			return 2;
-		default:
-			return 3;
-	}
-};
 var elm$virtual_dom$VirtualDom$property = F2(
 	function (key, value) {
 		return A2(
@@ -6833,9 +6986,6 @@ var elm$core$List$all = F2(
 			A2(elm$core$Basics$composeL, elm$core$Basics$not, isOkay),
 			list);
 	});
-var elm$core$String$isEmpty = function (string) {
-	return string === '';
-};
 var rtfeldman$elm_css$Css$Structure$compactHelp = F2(
 	function (declaration, _n0) {
 		var keyframesByName = _n0.a;
@@ -7312,7 +7462,7 @@ var rtfeldman$elm_css$Html$Styled$styled = F4(
 				attrs),
 			children);
 	});
-var author$project$Button$button = F2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Button$button = F2(
 	function (theme, model) {
 		var bg = function () {
 			var _n2 = model.kind;
@@ -7370,19 +7520,8 @@ var author$project$Button$button = F2(
 					rtfeldman$elm_css$Css$fontFamilies(theme.font)
 				]));
 	});
-var author$project$Theme$Medium = {$: 'Medium'};
-var author$project$Theme$Primary = {$: 'Primary'};
-var elm$core$String$length = _String_length;
-var elm$core$String$slice = _String_slice;
-var elm$core$String$dropLeft = F2(
-	function (n, string) {
-		return (n < 1) ? string : A3(
-			elm$core$String$slice,
-			n,
-			elm$core$String$length(string),
-			string);
-	});
-var elm$core$String$startsWith = _String_startsWith;
+var nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium = {$: 'Medium'};
+var nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary = {$: 'Primary'};
 var elm$core$String$foldr = _String_foldr;
 var elm$core$String$toList = function (string) {
 	return A3(elm$core$String$foldr, elm$core$List$cons, _List_Nil, string);
@@ -7403,11 +7542,6 @@ var rtfeldman$elm_css$Css$erroneousHex = function (str) {
 		value: rtfeldman$elm_css$Css$withPrecedingHash(str)
 	};
 };
-var elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var elm$core$String$toLower = _String_toLower;
 var elm$core$Result$map = F2(
 	function (func, ra) {
@@ -7765,9 +7899,9 @@ var rtfeldman$elm_css$Css$hex = function (str) {
 	}
 	return rtfeldman$elm_css$Css$erroneousHex(str);
 };
-var author$project$Button$defaultButton = {
-	kind: author$project$Theme$Primary,
-	size: author$project$Theme$Medium,
+var nathanjohnson320$elm_ui_components$ElmUIC$Button$defaultButton = {
+	kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary,
+	size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium,
 	text: rtfeldman$elm_css$Css$hex('#FFF')
 };
 var rtfeldman$elm_css$Css$Internal$property = F2(
@@ -8278,7 +8412,7 @@ var rtfeldman$elm_css$VirtualDom$Styled$attribute = F2(
 	});
 var rtfeldman$elm_css$Svg$Styled$Attributes$d = rtfeldman$elm_css$VirtualDom$Styled$attribute('d');
 var rtfeldman$elm_css$Svg$Styled$Attributes$viewBox = rtfeldman$elm_css$VirtualDom$Styled$attribute('viewBox');
-var author$project$Checkbox$checkbox = F4(
+var nathanjohnson320$elm_ui_components$ElmUIC$Checkbox$checkbox = F4(
 	function (theme, model, attr, inner) {
 		var checkboxColor = function () {
 			var _n4 = model.kind;
@@ -8427,14 +8561,15 @@ var author$project$Checkbox$checkbox = F4(
 						[checkmark]))
 				]));
 	});
-var author$project$Checkbox$defaultCheckbox = {checked: false, kind: author$project$Theme$Primary, size: author$project$Theme$Medium};
-var author$project$FileInput$defaultFileInput = {
+var nathanjohnson320$elm_ui_components$ElmUIC$Checkbox$defaultCheckbox = {checked: false, kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary, size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium};
+var nathanjohnson320$elm_ui_components$ElmUIC$FileInput$defaultFileInput = {
 	file: elm$core$Maybe$Nothing,
-	kind: author$project$Theme$Primary,
-	size: author$project$Theme$Medium,
+	kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary,
+	size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium,
 	text: rtfeldman$elm_css$Css$hex('#FFF')
 };
-var author$project$FileInput$button = F2(
+var elm$file$File$name = _File_name;
+var nathanjohnson320$elm_ui_components$ElmUIC$FileInput$button = F2(
 	function (theme, model) {
 		var bg = function () {
 			var _n2 = model.kind;
@@ -8501,7 +8636,7 @@ var rtfeldman$elm_css$Css$overflow = rtfeldman$elm_css$Css$prop1('overflow');
 var rtfeldman$elm_css$Css$textOverflow = rtfeldman$elm_css$Css$prop1('text-overflow');
 var rtfeldman$elm_css$Css$whiteSpace = rtfeldman$elm_css$Css$prop1('white-space');
 var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div');
-var author$project$FileInput$name = A2(
+var nathanjohnson320$elm_ui_components$ElmUIC$FileInput$name = A2(
 	rtfeldman$elm_css$Html$Styled$styled,
 	rtfeldman$elm_css$Html$Styled$div,
 	_List_fromArray(
@@ -8519,7 +8654,6 @@ var author$project$FileInput$name = A2(
 			rtfeldman$elm_css$Css$flex(
 			rtfeldman$elm_css$Css$int(1))
 		]));
-var elm$file$File$name = _File_name;
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
 	return {$: 'Unstyled', a: a};
@@ -8529,7 +8663,7 @@ var rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
 		elm$virtual_dom$VirtualDom$text(str));
 };
 var rtfeldman$elm_css$Html$Styled$text = rtfeldman$elm_css$VirtualDom$Styled$text;
-var author$project$FileInput$fileInput = F4(
+var nathanjohnson320$elm_ui_components$ElmUIC$FileInput$fileInput = F4(
 	function (theme, model, attr, inner) {
 		var fileName = function () {
 			var _n3 = model.file;
@@ -8602,14 +8736,14 @@ var author$project$FileInput$fileInput = F4(
 			_List_fromArray(
 				[
 					A2(
-					author$project$FileInput$name,
+					nathanjohnson320$elm_ui_components$ElmUIC$FileInput$name,
 					_List_Nil,
 					_List_fromArray(
 						[
 							rtfeldman$elm_css$Html$Styled$text(fileName)
 						])),
 					A4(
-					author$project$FileInput$button,
+					nathanjohnson320$elm_ui_components$ElmUIC$FileInput$button,
 					theme,
 					model,
 					_List_Nil,
@@ -8619,11 +8753,11 @@ var author$project$FileInput$fileInput = F4(
 						]))
 				]));
 	});
-var author$project$Input$defaultInput = {};
+var nathanjohnson320$elm_ui_components$ElmUIC$Input$defaultInput = {};
 var rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
 var rtfeldman$elm_css$Css$pct = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$PercentageUnits, '%');
 var rtfeldman$elm_css$Html$Styled$input = rtfeldman$elm_css$Html$Styled$node('input');
-var author$project$Input$input = F2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Input$input = F2(
 	function (theme, model) {
 		return A2(
 			rtfeldman$elm_css$Html$Styled$styled,
@@ -8688,54 +8822,11 @@ var author$project$Input$input = F2(
 					rtfeldman$elm_css$Css$fontFamilies(theme.font)
 				]));
 	});
-var author$project$Main$Check = {$: 'Check'};
-var author$project$Main$Click = {$: 'Click'};
-var author$project$Main$Input = function (a) {
-	return {$: 'Input', a: a};
-};
-var author$project$Main$Select = function (a) {
-	return {$: 'Select', a: a};
-};
-var author$project$Main$SelectFile = {$: 'SelectFile'};
-var author$project$Main$ToggleModal = function (a) {
-	return {$: 'ToggleModal', a: a};
-};
-var author$project$Main$alwaysPreventDefault = function (msg) {
-	return _Utils_Tuple2(msg, true);
-};
-var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 'MayStopPropagation', a: a};
-};
-var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var rtfeldman$elm_css$VirtualDom$Styled$on = F2(
-	function (eventName, handler) {
-		return A3(
-			rtfeldman$elm_css$VirtualDom$Styled$Attribute,
-			A2(elm$virtual_dom$VirtualDom$on, eventName, handler),
-			_List_Nil,
-			'');
-	});
-var rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn = F2(
-	function (event, decoder) {
-		return A2(
-			rtfeldman$elm_css$VirtualDom$Styled$on,
-			event,
-			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var author$project$Main$onClick = function (msg) {
-	return A2(
-		rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
-		'click',
-		A2(
-			elm$json$Json$Decode$map,
-			author$project$Main$alwaysPreventDefault,
-			elm$json$Json$Decode$succeed(msg)));
-};
-var author$project$Modal$defaultModal = {
+var nathanjohnson320$elm_ui_components$ElmUIC$Modal$defaultModal = {
 	closeOnOverlay: false,
-	kind: author$project$Theme$Primary,
+	kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary,
 	open: false,
-	size: author$project$Theme$Medium,
+	size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium,
 	text: rtfeldman$elm_css$Css$hex('#FFF')
 };
 var rtfeldman$elm_css$Css$absolute = {position: rtfeldman$elm_css$Css$Structure$Compatible, value: 'absolute'};
@@ -8749,7 +8840,7 @@ var rtfeldman$elm_css$Css$vh = A2(rtfeldman$elm_css$Css$Internal$lengthConverter
 var rtfeldman$elm_css$Css$VwUnits = {$: 'VwUnits'};
 var rtfeldman$elm_css$Css$vw = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$VwUnits, 'vw');
 var rtfeldman$elm_css$Css$zIndex = rtfeldman$elm_css$Css$prop1('z-index');
-var author$project$Modal$modalContent = F2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Modal$modalContent = F2(
 	function (theme, model) {
 		return A2(
 			rtfeldman$elm_css$Html$Styled$styled,
@@ -8783,16 +8874,35 @@ var author$project$Modal$modalContent = F2(
 						]))
 				]));
 	});
-var author$project$Modal$alwaysPreventDefault = function (msg) {
+var nathanjohnson320$elm_ui_components$ElmUIC$Modal$alwaysPreventDefault = function (msg) {
 	return _Utils_Tuple2(msg, true);
 };
-var author$project$Modal$onClick = function (msg) {
+var elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var rtfeldman$elm_css$VirtualDom$Styled$on = F2(
+	function (eventName, handler) {
+		return A3(
+			rtfeldman$elm_css$VirtualDom$Styled$Attribute,
+			A2(elm$virtual_dom$VirtualDom$on, eventName, handler),
+			_List_Nil,
+			'');
+	});
+var rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			rtfeldman$elm_css$VirtualDom$Styled$on,
+			event,
+			elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var nathanjohnson320$elm_ui_components$ElmUIC$Modal$onClick = function (msg) {
 	return A2(
 		rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
 		'click',
 		A2(
 			elm$json$Json$Decode$map,
-			author$project$Modal$alwaysPreventDefault,
+			nathanjohnson320$elm_ui_components$ElmUIC$Modal$alwaysPreventDefault,
 			elm$json$Json$Decode$succeed(msg)));
 };
 var rtfeldman$elm_css$Css$block = {display: rtfeldman$elm_css$Css$Structure$Compatible, value: 'block'};
@@ -8820,7 +8930,7 @@ var rtfeldman$elm_css$Css$rgba = F4(
 						])))
 		};
 	});
-var author$project$Modal$modal = F5(
+var nathanjohnson320$elm_ui_components$ElmUIC$Modal$modal = F5(
 	function (theme, model, msg, attr, inner) {
 		var openStyles = model.open ? _List_fromArray(
 			[
@@ -8890,28 +9000,28 @@ var author$project$Modal$modal = F5(
 				openStyles),
 			_List_fromArray(
 				[
-					author$project$Modal$onClick(
+					nathanjohnson320$elm_ui_components$ElmUIC$Modal$onClick(
 					msg(!model.closeOnOverlay))
 				]),
 			_List_fromArray(
 				[
 					A4(
-					author$project$Modal$modalContent,
+					nathanjohnson320$elm_ui_components$ElmUIC$Modal$modalContent,
 					theme,
 					model,
 					_Utils_ap(
 						_List_fromArray(
 							[
-								author$project$Modal$onClick(
+								nathanjohnson320$elm_ui_components$ElmUIC$Modal$onClick(
 								msg(true))
 							]),
 						attr),
 					inner)
 				]));
 	});
-var author$project$Navbar$defaultNavbar = {
-	kind: author$project$Theme$Primary,
-	size: author$project$Theme$Medium,
+var nathanjohnson320$elm_ui_components$ElmUIC$Navbar$defaultNavbar = {
+	kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary,
+	size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium,
 	text: rtfeldman$elm_css$Css$hex('#FFF'),
 	title: ''
 };
@@ -8933,7 +9043,7 @@ var rtfeldman$elm_css$Css$prop4 = F5(
 					[argA.value, argB.value, argC.value, argD.value])));
 	});
 var rtfeldman$elm_css$Css$textShadow4 = rtfeldman$elm_css$Css$prop4('text-shadow');
-var author$project$Navbar$item = function (theme) {
+var nathanjohnson320$elm_ui_components$ElmUIC$Navbar$item = function (theme) {
 	return A2(
 		rtfeldman$elm_css$Html$Styled$styled,
 		rtfeldman$elm_css$Html$Styled$div,
@@ -8979,7 +9089,7 @@ var rtfeldman$elm_css$Css$rgb = F3(
 						[r, g, b])))
 		};
 	});
-var author$project$Navbar$lighten = F2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Navbar$lighten = F2(
 	function (color, amount) {
 		var r = A2(
 			elm$core$Basics$min,
@@ -8995,7 +9105,7 @@ var author$project$Navbar$lighten = F2(
 			elm$core$Basics$round(color.blue + (amount * color.blue)));
 		return A3(rtfeldman$elm_css$Css$rgb, r, g, b);
 	});
-var author$project$Navbar$spacer = A2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Navbar$spacer = A2(
 	rtfeldman$elm_css$Html$Styled$styled,
 	rtfeldman$elm_css$Html$Styled$div,
 	_List_fromArray(
@@ -9003,7 +9113,7 @@ var author$project$Navbar$spacer = A2(
 			rtfeldman$elm_css$Css$flex(
 			rtfeldman$elm_css$Css$int(1))
 		]));
-var author$project$Navbar$title = A2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Navbar$title = A2(
 	rtfeldman$elm_css$Html$Styled$styled,
 	rtfeldman$elm_css$Html$Styled$div,
 	_List_fromArray(
@@ -9077,7 +9187,7 @@ var rtfeldman$elm_css$Css$relative = {position: rtfeldman$elm_css$Css$Structure$
 var rtfeldman$elm_css$Css$stop = function (c) {
 	return _Utils_Tuple2(c, elm$core$Maybe$Nothing);
 };
-var author$project$Navbar$navbar = F4(
+var nathanjohnson320$elm_ui_components$ElmUIC$Navbar$navbar = F4(
 	function (theme, model, attr, inner) {
 		var bg = function () {
 			var _n2 = model.kind;
@@ -9138,7 +9248,7 @@ var author$project$Navbar$navbar = F4(
 					A3(
 						rtfeldman$elm_css$Css$linearGradient,
 						rtfeldman$elm_css$Css$stop(
-							A2(author$project$Navbar$lighten, theme.primary, 3.5e-2)),
+							A2(nathanjohnson320$elm_ui_components$ElmUIC$Navbar$lighten, theme.primary, 3.5e-2)),
 						rtfeldman$elm_css$Css$stop(theme.primary),
 						_List_Nil)),
 					rtfeldman$elm_css$Css$alignItems(rtfeldman$elm_css$Css$center),
@@ -9155,24 +9265,24 @@ var author$project$Navbar$navbar = F4(
 				_List_fromArray(
 					[
 						A2(
-						author$project$Navbar$title,
+						nathanjohnson320$elm_ui_components$ElmUIC$Navbar$title,
 						_List_Nil,
 						_List_fromArray(
 							[
 								rtfeldman$elm_css$Html$Styled$text(model.title)
 							])),
-						A2(author$project$Navbar$spacer, _List_Nil, _List_Nil)
+						A2(nathanjohnson320$elm_ui_components$ElmUIC$Navbar$spacer, _List_Nil, _List_Nil)
 					]),
 				inner));
 	});
-var author$project$Navbar$separator = function (theme) {
+var nathanjohnson320$elm_ui_components$ElmUIC$Navbar$separator = function (theme) {
 	return A2(
 		rtfeldman$elm_css$Html$Styled$styled,
 		rtfeldman$elm_css$Html$Styled$div,
 		_List_fromArray(
 			[
 				rtfeldman$elm_css$Css$backgroundColor(
-				A2(author$project$Navbar$lighten, theme.primary, 0.1)),
+				A2(nathanjohnson320$elm_ui_components$ElmUIC$Navbar$lighten, theme.primary, 0.1)),
 				A2(
 				rtfeldman$elm_css$Css$margin2,
 				rtfeldman$elm_css$Css$zero,
@@ -9183,15 +9293,15 @@ var author$project$Navbar$separator = function (theme) {
 				rtfeldman$elm_css$Css$px(2))
 			]));
 };
-var author$project$Selector$defaultSelector = {
-	kind: author$project$Theme$Primary,
+var nathanjohnson320$elm_ui_components$ElmUIC$Selector$defaultSelector = {
+	kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary,
 	open: false,
 	options: _List_Nil,
 	placeholder: '',
 	selected: {key: '', value: ''},
-	size: author$project$Theme$Medium
+	size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium
 };
-var author$project$Selector$getColor = F2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Selector$getColor = F2(
 	function (theme, model) {
 		var _n0 = model.kind;
 		switch (_n0.$) {
@@ -9209,12 +9319,12 @@ var author$project$Selector$getColor = F2(
 	});
 var rtfeldman$elm_css$Css$hover = rtfeldman$elm_css$Css$pseudoClass('hover');
 var rtfeldman$elm_css$Css$padding4 = rtfeldman$elm_css$Css$prop4('padding');
-var author$project$Selector$dropdownItem = F4(
+var nathanjohnson320$elm_ui_components$ElmUIC$Selector$dropdownItem = F4(
 	function (theme, model, option, attrs) {
 		var selectedStyles = _Utils_eq(option.key, model.selected.key) ? _List_fromArray(
 			[
 				rtfeldman$elm_css$Css$backgroundColor(
-				A2(author$project$Selector$getColor, theme, model)),
+				A2(nathanjohnson320$elm_ui_components$ElmUIC$Selector$getColor, theme, model)),
 				rtfeldman$elm_css$Css$color(
 				rtfeldman$elm_css$Css$hex('#FFF'))
 			]) : _List_Nil;
@@ -9260,7 +9370,7 @@ var rtfeldman$elm_css$Css$inherit = _Utils_update(
 	rtfeldman$elm_css$Css$initial,
 	{value: 'inherit'});
 var rtfeldman$elm_css$Css$maxHeight = rtfeldman$elm_css$Css$prop1('max-height');
-var author$project$Selector$dropdownPanel = function (theme) {
+var nathanjohnson320$elm_ui_components$ElmUIC$Selector$dropdownPanel = function (theme) {
 	return A2(
 		rtfeldman$elm_css$Html$Styled$styled,
 		rtfeldman$elm_css$Html$Styled$div,
@@ -9296,9 +9406,9 @@ var author$project$Selector$dropdownPanel = function (theme) {
 				rtfeldman$elm_css$Css$px(8))
 			]));
 };
-var author$project$Selector$input = F2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Selector$input = F2(
 	function (theme, model) {
-		var textColor = A2(author$project$Selector$getColor, theme, model);
+		var textColor = A2(nathanjohnson320$elm_ui_components$ElmUIC$Selector$getColor, theme, model);
 		var _n0 = function () {
 			var _n1 = model.size;
 			switch (_n1.$) {
@@ -9363,7 +9473,7 @@ var author$project$Selector$input = F2(
 var rtfeldman$elm_css$Css$overflowY = rtfeldman$elm_css$Css$prop1('overflow-y');
 var rtfeldman$elm_css$Css$paddingRight = rtfeldman$elm_css$Css$prop1('padding-right');
 var rtfeldman$elm_css$Css$scroll = {backgroundAttachment: rtfeldman$elm_css$Css$Structure$Compatible, blockAxisOverflow: rtfeldman$elm_css$Css$Structure$Compatible, inlineAxisOverflow: rtfeldman$elm_css$Css$Structure$Compatible, overflow: rtfeldman$elm_css$Css$Structure$Compatible, scroll: rtfeldman$elm_css$Css$Structure$Compatible, value: 'scroll'};
-var author$project$Selector$panelWrapper = A2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Selector$panelWrapper = A2(
 	rtfeldman$elm_css$Html$Styled$styled,
 	rtfeldman$elm_css$Html$Styled$div,
 	_List_fromArray(
@@ -9419,7 +9529,7 @@ var rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
 		'click',
 		elm$json$Json$Decode$succeed(msg));
 };
-var author$project$Selector$selector = F5(
+var nathanjohnson320$elm_ui_components$ElmUIC$Selector$selector = F5(
 	function (theme, model, selectMsg, attr, inner) {
 		var panelVisibility = model.open ? _List_fromArray(
 			[
@@ -9435,7 +9545,7 @@ var author$project$Selector$selector = F5(
 			_List_fromArray(
 				[
 					A4(
-					author$project$Selector$input,
+					nathanjohnson320$elm_ui_components$ElmUIC$Selector$input,
 					theme,
 					model,
 					_List_fromArray(
@@ -9448,7 +9558,7 @@ var author$project$Selector$selector = F5(
 						]),
 					_List_Nil),
 					A3(
-					author$project$Selector$dropdownPanel,
+					nathanjohnson320$elm_ui_components$ElmUIC$Selector$dropdownPanel,
 					theme,
 					_List_fromArray(
 						[
@@ -9457,13 +9567,13 @@ var author$project$Selector$selector = F5(
 					_List_fromArray(
 						[
 							A2(
-							author$project$Selector$panelWrapper,
+							nathanjohnson320$elm_ui_components$ElmUIC$Selector$panelWrapper,
 							_List_Nil,
 							A2(
 								elm$core$List$map,
 								function (option) {
 									return A4(
-										author$project$Selector$dropdownItem,
+										nathanjohnson320$elm_ui_components$ElmUIC$Selector$dropdownItem,
 										theme,
 										model,
 										option,
@@ -9477,9 +9587,9 @@ var author$project$Selector$selector = F5(
 						]))
 				]));
 	});
-var author$project$Theme$Danger = {$: 'Danger'};
-var author$project$Theme$Large = {$: 'Large'};
-var author$project$Theme$defaultTheme = {
+var nathanjohnson320$elm_ui_components$ElmUIC$Theme$Danger = {$: 'Danger'};
+var nathanjohnson320$elm_ui_components$ElmUIC$Theme$Large = {$: 'Large'};
+var nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme = {
 	danger: rtfeldman$elm_css$Css$hex('#E04141'),
 	font: _List_fromArray(
 		['-apple-system', 'system-ui', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif']),
@@ -9488,14 +9598,14 @@ var author$project$Theme$defaultTheme = {
 	success: rtfeldman$elm_css$Css$hex('#4DC151'),
 	warning: rtfeldman$elm_css$Css$hex('#FF9730')
 };
-var author$project$Toast$TopRight = {$: 'TopRight'};
-var author$project$Toast$Bottom = {$: 'Bottom'};
-var author$project$Toast$defaultToast = {
-	kind: author$project$Theme$Primary,
-	position: author$project$Toast$Bottom,
-	size: author$project$Theme$Medium,
+var nathanjohnson320$elm_ui_components$ElmUIC$Toast$TopRight = {$: 'TopRight'};
+var nathanjohnson320$elm_ui_components$ElmUIC$Toast$Bottom = {$: 'Bottom'};
+var nathanjohnson320$elm_ui_components$ElmUIC$Toast$defaultToast = {
+	kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Primary,
+	position: nathanjohnson320$elm_ui_components$ElmUIC$Toast$Bottom,
+	size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium,
 	text: rtfeldman$elm_css$Css$hex('#FFF'),
-	transitionDirection: author$project$Toast$Bottom,
+	transitionDirection: nathanjohnson320$elm_ui_components$ElmUIC$Toast$Bottom,
 	visible: false,
 	z: 1
 };
@@ -9529,7 +9639,7 @@ var rtfeldman$elm_css$Css$Transitions$Right = {$: 'Right'};
 var rtfeldman$elm_css$Css$Transitions$right3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Right);
 var rtfeldman$elm_css$Css$Transitions$Top = {$: 'Top'};
 var rtfeldman$elm_css$Css$Transitions$top3 = rtfeldman$elm_css$Css$Transitions$fullTransition(rtfeldman$elm_css$Css$Transitions$Top);
-var author$project$Toast$toast = F2(
+var nathanjohnson320$elm_ui_components$ElmUIC$Toast$toast = F2(
 	function (theme, model) {
 		var tr = function () {
 			var _n5 = model.transitionDirection;
@@ -9821,6 +9931,30 @@ var author$project$Toast$toast = F2(
 					]),
 				_Utils_ap(p, tr)));
 	});
+var nathanjohnson320$elm_ui_components$Main$Check = {$: 'Check'};
+var nathanjohnson320$elm_ui_components$Main$Click = {$: 'Click'};
+var nathanjohnson320$elm_ui_components$Main$Input = function (a) {
+	return {$: 'Input', a: a};
+};
+var nathanjohnson320$elm_ui_components$Main$Select = function (a) {
+	return {$: 'Select', a: a};
+};
+var nathanjohnson320$elm_ui_components$Main$SelectFile = {$: 'SelectFile'};
+var nathanjohnson320$elm_ui_components$Main$ToggleModal = function (a) {
+	return {$: 'ToggleModal', a: a};
+};
+var nathanjohnson320$elm_ui_components$Main$alwaysPreventDefault = function (msg) {
+	return _Utils_Tuple2(msg, true);
+};
+var nathanjohnson320$elm_ui_components$Main$onClick = function (msg) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$Events$stopPropagationOn,
+		'click',
+		A2(
+			elm$json$Json$Decode$map,
+			nathanjohnson320$elm_ui_components$Main$alwaysPreventDefault,
+			elm$json$Json$Decode$succeed(msg)));
+};
 var rtfeldman$elm_css$Html$Styled$nav = rtfeldman$elm_css$Html$Styled$node('nav');
 var rtfeldman$elm_css$Html$Styled$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -9845,66 +9979,66 @@ var rtfeldman$elm_css$Html$Styled$Events$onInput = function (tagger) {
 			rtfeldman$elm_css$Html$Styled$Events$alwaysStop,
 			A2(elm$json$Json$Decode$map, tagger, rtfeldman$elm_css$Html$Styled$Events$targetValue)));
 };
-var author$project$Main$view = function (model) {
+var nathanjohnson320$elm_ui_components$Main$view = function (model) {
 	return A2(
 		rtfeldman$elm_css$Html$Styled$nav,
 		_List_Nil,
 		_List_fromArray(
 			[
 				A4(
-				author$project$Button$button,
-				author$project$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Button$button,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 				_Utils_update(
-					author$project$Button$defaultButton,
-					{size: author$project$Theme$Large}),
+					nathanjohnson320$elm_ui_components$ElmUIC$Button$defaultButton,
+					{size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Large}),
 				_List_fromArray(
 					[
-						author$project$Main$onClick(author$project$Main$Click)
+						nathanjohnson320$elm_ui_components$Main$onClick(nathanjohnson320$elm_ui_components$Main$Click)
 					]),
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$text('Click me!')
 					])),
 				A4(
-				author$project$Input$input,
-				author$project$Theme$defaultTheme,
-				author$project$Input$defaultInput,
+				nathanjohnson320$elm_ui_components$ElmUIC$Input$input,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Input$defaultInput,
 				_List_fromArray(
 					[
-						rtfeldman$elm_css$Html$Styled$Events$onInput(author$project$Main$Input),
+						rtfeldman$elm_css$Html$Styled$Events$onInput(nathanjohnson320$elm_ui_components$Main$Input),
 						rtfeldman$elm_css$Html$Styled$Attributes$value(model.input),
 						rtfeldman$elm_css$Html$Styled$Attributes$placeholder('Input things')
 					]),
 				_List_Nil),
 				A4(
-				author$project$Checkbox$checkbox,
-				author$project$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Checkbox$checkbox,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 				_Utils_update(
-					author$project$Checkbox$defaultCheckbox,
-					{checked: model.checked, size: author$project$Theme$Medium}),
+					nathanjohnson320$elm_ui_components$ElmUIC$Checkbox$defaultCheckbox,
+					{checked: model.checked, size: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Medium}),
 				_List_fromArray(
 					[
-						author$project$Main$onClick(author$project$Main$Check)
+						nathanjohnson320$elm_ui_components$Main$onClick(nathanjohnson320$elm_ui_components$Main$Check)
 					]),
 				_List_Nil),
 				A4(
-				author$project$Toast$toast,
-				author$project$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Toast$toast,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 				_Utils_update(
-					author$project$Toast$defaultToast,
-					{position: author$project$Toast$TopRight, transitionDirection: author$project$Toast$TopRight, visible: model.checked}),
+					nathanjohnson320$elm_ui_components$ElmUIC$Toast$defaultToast,
+					{position: nathanjohnson320$elm_ui_components$ElmUIC$Toast$TopRight, transitionDirection: nathanjohnson320$elm_ui_components$ElmUIC$Toast$TopRight, visible: model.checked}),
 				_List_Nil,
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$text('Notify things!')
 					])),
 				A5(
-				author$project$Selector$selector,
-				author$project$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Selector$selector,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 				_Utils_update(
-					author$project$Selector$defaultSelector,
-					{kind: author$project$Theme$Danger, open: model.selectedOpen, options: model.options, placeholder: 'Select a choice', selected: model.selected}),
-				author$project$Main$Select,
+					nathanjohnson320$elm_ui_components$ElmUIC$Selector$defaultSelector,
+					{kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Danger, open: model.selectedOpen, options: model.options, placeholder: 'Select a choice', selected: model.selected}),
+				nathanjohnson320$elm_ui_components$Main$Select,
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$Attributes$css(
@@ -9916,25 +10050,25 @@ var author$project$Main$view = function (model) {
 					]),
 				_List_Nil),
 				A4(
-				author$project$Button$button,
-				author$project$Theme$defaultTheme,
-				author$project$Button$defaultButton,
+				nathanjohnson320$elm_ui_components$ElmUIC$Button$button,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Button$defaultButton,
 				_List_fromArray(
 					[
-						author$project$Main$onClick(
-						author$project$Main$ToggleModal(true))
+						nathanjohnson320$elm_ui_components$Main$onClick(
+						nathanjohnson320$elm_ui_components$Main$ToggleModal(true))
 					]),
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$text('OpenModal')
 					])),
 				A5(
-				author$project$Modal$modal,
-				author$project$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Modal$modal,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 				_Utils_update(
-					author$project$Modal$defaultModal,
+					nathanjohnson320$elm_ui_components$ElmUIC$Modal$defaultModal,
 					{open: model.modalOpen}),
-				author$project$Main$ToggleModal,
+				nathanjohnson320$elm_ui_components$Main$ToggleModal,
 				_List_fromArray(
 					[
 						rtfeldman$elm_css$Html$Styled$Attributes$css(
@@ -9949,13 +10083,13 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						A4(
-						author$project$Button$button,
-						author$project$Theme$defaultTheme,
-						author$project$Button$defaultButton,
+						nathanjohnson320$elm_ui_components$ElmUIC$Button$button,
+						nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
+						nathanjohnson320$elm_ui_components$ElmUIC$Button$defaultButton,
 						_List_fromArray(
 							[
-								author$project$Main$onClick(
-								author$project$Main$ToggleModal(false))
+								nathanjohnson320$elm_ui_components$Main$onClick(
+								nathanjohnson320$elm_ui_components$Main$ToggleModal(false))
 							]),
 						_List_fromArray(
 							[
@@ -9963,10 +10097,10 @@ var author$project$Main$view = function (model) {
 							]))
 					])),
 				A4(
-				author$project$Navbar$navbar,
-				author$project$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$Navbar$navbar,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 				_Utils_update(
-					author$project$Navbar$defaultNavbar,
+					nathanjohnson320$elm_ui_components$ElmUIC$Navbar$defaultNavbar,
 					{title: 'Hello, WORLD'}),
 				_List_fromArray(
 					[
@@ -9980,26 +10114,26 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						A3(
-						author$project$Navbar$item,
-						author$project$Theme$defaultTheme,
+						nathanjohnson320$elm_ui_components$ElmUIC$Navbar$item,
+						nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 						_List_Nil,
 						_List_fromArray(
 							[
 								rtfeldman$elm_css$Html$Styled$text('Sad')
 							])),
-						A3(author$project$Navbar$separator, author$project$Theme$defaultTheme, _List_Nil, _List_Nil),
+						A3(nathanjohnson320$elm_ui_components$ElmUIC$Navbar$separator, nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme, _List_Nil, _List_Nil),
 						A3(
-						author$project$Navbar$item,
-						author$project$Theme$defaultTheme,
+						nathanjohnson320$elm_ui_components$ElmUIC$Navbar$item,
+						nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 						_List_Nil,
 						_List_fromArray(
 							[
 								rtfeldman$elm_css$Html$Styled$text('Sad 2')
 							])),
-						A3(author$project$Navbar$separator, author$project$Theme$defaultTheme, _List_Nil, _List_Nil),
+						A3(nathanjohnson320$elm_ui_components$ElmUIC$Navbar$separator, nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme, _List_Nil, _List_Nil),
 						A3(
-						author$project$Navbar$item,
-						author$project$Theme$defaultTheme,
+						nathanjohnson320$elm_ui_components$ElmUIC$Navbar$item,
+						nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 						_List_Nil,
 						_List_fromArray(
 							[
@@ -10007,152 +10141,18 @@ var author$project$Main$view = function (model) {
 							]))
 					])),
 				A4(
-				author$project$FileInput$fileInput,
-				author$project$Theme$defaultTheme,
+				nathanjohnson320$elm_ui_components$ElmUIC$FileInput$fileInput,
+				nathanjohnson320$elm_ui_components$ElmUIC$Theme$defaultTheme,
 				_Utils_update(
-					author$project$FileInput$defaultFileInput,
-					{file: model.selectedFile, kind: author$project$Theme$Danger}),
+					nathanjohnson320$elm_ui_components$ElmUIC$FileInput$defaultFileInput,
+					{file: model.selectedFile, kind: nathanjohnson320$elm_ui_components$ElmUIC$Theme$Danger}),
 				_List_fromArray(
 					[
-						author$project$Main$onClick(author$project$Main$SelectFile)
+						nathanjohnson320$elm_ui_components$Main$onClick(nathanjohnson320$elm_ui_components$Main$SelectFile)
 					]),
 				_List_Nil)
 			]));
 };
-var elm$browser$Browser$External = function (a) {
-	return {$: 'External', a: a};
-};
-var elm$browser$Browser$Internal = function (a) {
-	return {$: 'Internal', a: a};
-};
-var elm$browser$Browser$Dom$NotFound = function (a) {
-	return {$: 'NotFound', a: a};
-};
-var elm$core$Basics$never = function (_n0) {
-	never:
-	while (true) {
-		var nvr = _n0.a;
-		var $temp$_n0 = nvr;
-		_n0 = $temp$_n0;
-		continue never;
-	}
-};
-var elm$url$Url$Http = {$: 'Http'};
-var elm$url$Url$Https = {$: 'Https'};
-var elm$core$String$indexes = _String_indexes;
-var elm$core$String$left = F2(
-	function (n, string) {
-		return (n < 1) ? '' : A3(elm$core$String$slice, 0, n, string);
-	});
-var elm$core$String$contains = _String_contains;
-var elm$core$String$toInt = _String_toInt;
-var elm$url$Url$Url = F6(
-	function (protocol, host, port_, path, query, fragment) {
-		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
-	});
-var elm$url$Url$chompBeforePath = F5(
-	function (protocol, path, params, frag, str) {
-		if (elm$core$String$isEmpty(str) || A2(elm$core$String$contains, '@', str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, ':', str);
-			if (!_n0.b) {
-				return elm$core$Maybe$Just(
-					A6(elm$url$Url$Url, protocol, str, elm$core$Maybe$Nothing, path, params, frag));
-			} else {
-				if (!_n0.b.b) {
-					var i = _n0.a;
-					var _n1 = elm$core$String$toInt(
-						A2(elm$core$String$dropLeft, i + 1, str));
-					if (_n1.$ === 'Nothing') {
-						return elm$core$Maybe$Nothing;
-					} else {
-						var port_ = _n1;
-						return elm$core$Maybe$Just(
-							A6(
-								elm$url$Url$Url,
-								protocol,
-								A2(elm$core$String$left, i, str),
-								port_,
-								path,
-								params,
-								frag));
-					}
-				} else {
-					return elm$core$Maybe$Nothing;
-				}
-			}
-		}
-	});
-var elm$url$Url$chompBeforeQuery = F4(
-	function (protocol, params, frag, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '/', str);
-			if (!_n0.b) {
-				return A5(elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
-			} else {
-				var i = _n0.a;
-				return A5(
-					elm$url$Url$chompBeforePath,
-					protocol,
-					A2(elm$core$String$dropLeft, i, str),
-					params,
-					frag,
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$chompBeforeFragment = F3(
-	function (protocol, frag, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '?', str);
-			if (!_n0.b) {
-				return A4(elm$url$Url$chompBeforeQuery, protocol, elm$core$Maybe$Nothing, frag, str);
-			} else {
-				var i = _n0.a;
-				return A4(
-					elm$url$Url$chompBeforeQuery,
-					protocol,
-					elm$core$Maybe$Just(
-						A2(elm$core$String$dropLeft, i + 1, str)),
-					frag,
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$chompAfterProtocol = F2(
-	function (protocol, str) {
-		if (elm$core$String$isEmpty(str)) {
-			return elm$core$Maybe$Nothing;
-		} else {
-			var _n0 = A2(elm$core$String$indexes, '#', str);
-			if (!_n0.b) {
-				return A3(elm$url$Url$chompBeforeFragment, protocol, elm$core$Maybe$Nothing, str);
-			} else {
-				var i = _n0.a;
-				return A3(
-					elm$url$Url$chompBeforeFragment,
-					protocol,
-					elm$core$Maybe$Just(
-						A2(elm$core$String$dropLeft, i + 1, str)),
-					A2(elm$core$String$left, i, str));
-			}
-		}
-	});
-var elm$url$Url$fromString = function (str) {
-	return A2(elm$core$String$startsWith, 'http://', str) ? A2(
-		elm$url$Url$chompAfterProtocol,
-		elm$url$Url$Http,
-		A2(elm$core$String$dropLeft, 7, str)) : (A2(elm$core$String$startsWith, 'https://', str) ? A2(
-		elm$url$Url$chompAfterProtocol,
-		elm$url$Url$Https,
-		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
-};
-var elm$browser$Browser$element = _Browser_element;
 var elm$virtual_dom$VirtualDom$node = function (tag) {
 	return _VirtualDom_node(
 		_VirtualDom_noScript(tag));
@@ -10634,14 +10634,14 @@ var rtfeldman$elm_css$VirtualDom$Styled$toUnstyled = function (vdom) {
 	}
 };
 var rtfeldman$elm_css$Html$Styled$toUnstyled = rtfeldman$elm_css$VirtualDom$Styled$toUnstyled;
-var author$project$Main$main = elm$browser$Browser$element(
+var nathanjohnson320$elm_ui_components$Main$main = elm$browser$Browser$element(
 	{
-		init: author$project$Main$init,
-		subscriptions: author$project$Main$subscriptions,
-		update: author$project$Main$update,
-		view: A2(elm$core$Basics$composeR, author$project$Main$view, rtfeldman$elm_css$Html$Styled$toUnstyled)
+		init: nathanjohnson320$elm_ui_components$Main$init,
+		subscriptions: nathanjohnson320$elm_ui_components$Main$subscriptions,
+		update: nathanjohnson320$elm_ui_components$Main$update,
+		view: A2(elm$core$Basics$composeR, nathanjohnson320$elm_ui_components$Main$view, rtfeldman$elm_css$Html$Styled$toUnstyled)
 	});
-_Platform_export({'Main':{'init':author$project$Main$main(
+_Platform_export({'Main':{'init':nathanjohnson320$elm_ui_components$Main$main(
 	elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
 },{}],"index.js":[function(require,module,exports) {
 "use strict";
@@ -10679,7 +10679,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63316" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64558" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

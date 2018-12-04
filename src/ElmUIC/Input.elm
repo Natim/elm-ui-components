@@ -1,9 +1,9 @@
-module Input exposing (Input, defaultInput, input)
+module ElmUIC.Input exposing (Input, defaultInput, input)
 
 import Css exposing (Color, backgroundColor, border3, borderBox, borderRadius, boxShadow6, boxSizing, color, focus, fontFamilies, fontSize, height, hex, inset, lineHeight, none, outline, padding2, pct, px, solid, transparent, width, zero)
 import Css.Transitions exposing (linear, transition)
+import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
-import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 type alias Input =

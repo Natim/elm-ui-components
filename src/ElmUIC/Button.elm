@@ -1,8 +1,8 @@
-module Button exposing (Button, button, defaultButton)
+module ElmUIC.Button exposing (Button, button, defaultButton)
 
 import Css exposing (Color, backgroundColor, borderRadius, color, fontFamilies, fontSize, height, hex, padding2, px)
+import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
-import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 type alias Button =

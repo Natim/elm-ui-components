@@ -1,11 +1,11 @@
-module Checkbox exposing (Checkbox, checkbox, defaultCheckbox)
+module ElmUIC.Checkbox exposing (Checkbox, checkbox, defaultCheckbox)
 
 import Css exposing (alignItems, backgroundColor, border3, borderBox, borderRadius, boxShadow6, boxSizing, center, color, cursor, deg, display, displayFlex, fill, focus, height, hex, inlineBlock, inset, int, justifyContent, none, opacity, outline, padding, pointer, px, rotate, scale, solid, transform, transforms, translateX, translateY, transparent, width, zero)
 import Css.Transitions exposing (linear, transition)
+import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
 import Svg.Styled exposing (path, svg)
 import Svg.Styled.Attributes as Svg
-import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 type alias Checkbox =

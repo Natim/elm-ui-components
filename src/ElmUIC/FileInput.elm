@@ -1,9 +1,9 @@
-module FileInput exposing (FileInput, defaultFileInput, fileInput)
+module ElmUIC.FileInput exposing (FileInput, defaultFileInput, fileInput)
 
 import Css exposing (Color, backgroundColor, border3, borderRadius, color, cursor, displayFlex, ellipsis, flex, fontFamilies, fontSize, height, hex, hidden, int, lineHeight, noWrap, overflow, padding2, pointer, px, solid, textOverflow, whiteSpace, zero)
+import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import File exposing (File)
 import Html.Styled as Styled exposing (Attribute, Html, styled, text)
-import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 type alias FileInput =

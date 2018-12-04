@@ -1,10 +1,10 @@
-module Modal exposing (Modal, defaultModal, modal)
+module ElmUIC.Modal exposing (Modal, defaultModal, modal)
 
 import Css exposing (Color, absolute, backgroundColor, block, borderRadius, bottom, color, display, fixed, fontFamilies, fontSize, height, hex, int, left, minHeight, minWidth, none, num, opacity, padding2, pct, position, px, relative, rgba, right, top, transforms, translateX, translateY, vh, vw, width, zIndex, zero)
+import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
 import Html.Styled.Events exposing (stopPropagationOn)
 import Json.Decode as Json
-import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 onClick : msg -> Attribute msg

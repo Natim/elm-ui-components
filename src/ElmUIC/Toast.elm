@@ -1,9 +1,9 @@
-module Toast exposing (Position(..), Toast, defaultToast, toast)
+module ElmUIC.Toast exposing (Position(..), Toast, defaultToast, toast)
 
 import Css exposing (Color, absolute, backgroundColor, borderRadius, bottom, boxShadow5, calc, center, color, column, displayFlex, flexDirection, fontFamilies, fontSize, height, hex, int, justifyContent, left, margin, minus, padding, pct, position, px, right, textAlign, top, transform, translateX, translateY, zIndex, zero)
 import Css.Transitions exposing (easeInOut, transition)
+import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
-import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 type alias Toast =

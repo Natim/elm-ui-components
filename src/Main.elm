@@ -1,23 +1,23 @@
 module Main exposing (main)
 
 import Browser
-import Button exposing (button, defaultButton)
-import Checkbox exposing (checkbox, defaultCheckbox)
 import Css exposing (height, px, width)
+import ElmUIC.Button exposing (button, defaultButton)
+import ElmUIC.Checkbox exposing (checkbox, defaultCheckbox)
+import ElmUIC.FileInput exposing (defaultFileInput, fileInput)
+import ElmUIC.Input exposing (defaultInput, input)
+import ElmUIC.Modal exposing (defaultModal, modal)
+import ElmUIC.Navbar exposing (defaultNavbar, item, navbar, separator)
+import ElmUIC.Selector exposing (Option, defaultSelector, dropdownItem, selector)
+import ElmUIC.Theme as Theme exposing (ColorSetting(..), Size(..), defaultTheme)
+import ElmUIC.Toast exposing (Position(..), defaultToast, toast)
 import File exposing (File)
 import File.Select as Select
-import FileInput exposing (defaultFileInput, fileInput)
 import Html
 import Html.Styled exposing (Attribute, Html, nav, text, toUnstyled)
 import Html.Styled.Attributes exposing (css, placeholder, value)
 import Html.Styled.Events exposing (onInput, stopPropagationOn)
-import Input exposing (defaultInput, input)
 import Json.Decode as Json
-import Modal exposing (defaultModal, modal)
-import Navbar exposing (defaultNavbar, item, navbar, separator)
-import Selector exposing (Option, defaultSelector, dropdownItem, selector)
-import Theme exposing (ColorSetting(..), Size(..), defaultTheme)
-import Toast exposing (Position(..), defaultToast, toast)
 
 
 onClick : msg -> Attribute msg

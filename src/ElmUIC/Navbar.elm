@@ -1,8 +1,8 @@
-module Navbar exposing (Navbar, defaultNavbar, item, navbar, separator)
+module ElmUIC.Navbar exposing (Navbar, defaultNavbar, item, navbar, separator)
 
 import Css exposing (Color, alignItems, auto, backgroundColor, backgroundImage, bold, borderRadius, boxShadow5, center, color, displayFlex, flex, flex3, fontFamilies, fontSize, fontWeight, height, hex, int, linearGradient, margin2, padding2, pct, position, px, relative, rgb, rgba, stop, stop2, textShadow4, width, zIndex, zero)
+import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled, text)
-import Theme exposing (ColorSetting(..), Size(..), Theme)
 
 
 lighten : Color -> Float -> Color

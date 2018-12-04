@@ -1,4 +1,4 @@
-module Theme exposing (ColorSetting(..), Size(..), Theme, defaultTheme)
+module ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme, defaultTheme)
 
 import Css exposing (Color, hex)
 

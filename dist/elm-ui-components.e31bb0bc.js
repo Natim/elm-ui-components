@@ -8883,7 +8883,9 @@ var author$project$Modal$modal = F5(
 						rtfeldman$elm_css$Css$height(
 						rtfeldman$elm_css$Css$vh(100)),
 						rtfeldman$elm_css$Css$top(rtfeldman$elm_css$Css$zero),
-						rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero)
+						rtfeldman$elm_css$Css$left(rtfeldman$elm_css$Css$zero),
+						rtfeldman$elm_css$Css$zIndex(
+						rtfeldman$elm_css$Css$int(1000))
 					]),
 				openStyles),
 			_List_fromArray(
@@ -10677,7 +10679,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59603" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63316" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

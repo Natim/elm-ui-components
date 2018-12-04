@@ -105,6 +105,7 @@ modal theme model msg attr inner =
          , height (vh 100)
          , top zero
          , left zero
+         , zIndex (int 1000)
          ]
             ++ openStyles
         )

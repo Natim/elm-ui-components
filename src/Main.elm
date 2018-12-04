@@ -4,6 +4,9 @@ import Browser
 import Button exposing (button, defaultButton)
 import Checkbox exposing (checkbox, defaultCheckbox)
 import Css exposing (height, px, width)
+import File exposing (File)
+import File.Select as Select
+import FileInput exposing (defaultFileInput, fileInput)
 import Html
 import Html.Styled exposing (Attribute, Html, nav, text, toUnstyled)
 import Html.Styled.Attributes exposing (css, placeholder, value)
@@ -13,7 +16,7 @@ import Json.Decode as Json
 import Modal exposing (defaultModal, modal)
 import Navbar exposing (defaultNavbar, item, navbar, separator)
 import Selector exposing (Option, defaultSelector, dropdownItem, selector)
-import Theme exposing (Size(..), defaultTheme)
+import Theme exposing (ColorSetting(..), Size(..), defaultTheme)
 import Toast exposing (Position(..), defaultToast, toast)
 
 
@@ -27,6 +30,11 @@ alwaysPreventDefault msg =
     ( msg, True )
 
 
+selectFile : Cmd Msg
+selectFile =
+    Select.file [ "text/plain" ] FileLoaded
+
+
 type Msg
     = NoOp
     | Click
@@ -34,6 +42,8 @@ type Msg
     | Check
     | Select Option
     | ToggleModal Bool
+    | SelectFile
+    | FileLoaded File
 
 
 type alias Model =
@@ -43,6 +53,7 @@ type alias Model =
     , options : List Option
     , selectedOpen : Bool
     , modalOpen : Bool
+    , selectedFile : Maybe File
     }
 
 
@@ -52,6 +63,7 @@ initialModel =
     , checked = False
     , selectedOpen = False
     , modalOpen = False
+    , selectedFile = Nothing
     , selected =
         { key = ""
         , value = ""
@@ -158,35 +170,64 @@ view model =
             , separator defaultTheme [] []
             , item defaultTheme [] [ text "Sad 3" ]
             ]
+        , fileInput defaultTheme
+            { defaultFileInput | file = model.selectedFile, kind = Danger }
+            [ onClick SelectFile ]
+            []
         ]
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Input val ->
-            { model | input = val }
+            ( { model | input = val }, Cmd.none )
 
         Check ->
-            { model | checked = not model.checked }
+            ( { model | checked = not model.checked }, Cmd.none )
 
         Select option ->
-            { model
+            ( { model
                 | selectedOpen = not model.selectedOpen
                 , selected = option
-            }
+              }
+            , Cmd.none
+            )
 
         ToggleModal direction ->
-            { model | modalOpen = direction }
+            ( { model | modalOpen = direction }, Cmd.none )
+
+        SelectFile ->
+            ( model, selectFile )
+
+        FileLoaded file ->
+            ( { model | selectedFile = Just file }, Cmd.none )
 
         _ ->
-            model
+            ( model, Cmd.none )
+
+
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( initialModel
+    , Cmd.none
+    )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
 main : Program () Model Msg
 main =
-    Browser.sandbox
-        { view = view >> toUnstyled
+    Browser.element
+        { init = init
         , update = update
-        , init = initialModel
+        , subscriptions = subscriptions
+        , view = view >> toUnstyled
         }

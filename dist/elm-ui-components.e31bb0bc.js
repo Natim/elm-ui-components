@@ -960,6 +960,53 @@ var _Basics_xor = F2(function(a, b) { return a !== b; });
 
 
 
+function _Char_toCode(char)
+{
+	var code = char.charCodeAt(0);
+	if (0xD800 <= code && code <= 0xDBFF)
+	{
+		return (code - 0xD800) * 0x400 + char.charCodeAt(1) - 0xDC00 + 0x10000
+	}
+	return code;
+}
+
+function _Char_fromCode(code)
+{
+	return _Utils_chr(
+		(code < 0 || 0x10FFFF < code)
+			? '\uFFFD'
+			:
+		(code <= 0xFFFF)
+			? String.fromCharCode(code)
+			:
+		(code -= 0x10000,
+			String.fromCharCode(Math.floor(code / 0x400) + 0xD800, code % 0x400 + 0xDC00)
+		)
+	);
+}
+
+function _Char_toUpper(char)
+{
+	return _Utils_chr(char.toUpperCase());
+}
+
+function _Char_toLower(char)
+{
+	return _Utils_chr(char.toLowerCase());
+}
+
+function _Char_toLocaleUpper(char)
+{
+	return _Utils_chr(char.toLocaleUpperCase());
+}
+
+function _Char_toLocaleLower(char)
+{
+	return _Utils_chr(char.toLocaleLowerCase());
+}
+
+
+
 var _String_cons = F2(function(chr, str)
 {
 	return chr + str;
@@ -1269,53 +1316,6 @@ function _String_fromList(chars)
 	return _List_toArray(chars).join('');
 }
 
-
-
-
-function _Char_toCode(char)
-{
-	var code = char.charCodeAt(0);
-	if (0xD800 <= code && code <= 0xDBFF)
-	{
-		return (code - 0xD800) * 0x400 + char.charCodeAt(1) - 0xDC00 + 0x10000
-	}
-	return code;
-}
-
-function _Char_fromCode(code)
-{
-	return _Utils_chr(
-		(code < 0 || 0x10FFFF < code)
-			? '\uFFFD'
-			:
-		(code <= 0xFFFF)
-			? String.fromCharCode(code)
-			:
-		(code -= 0x10000,
-			String.fromCharCode(Math.floor(code / 0x400) + 0xD800, code % 0x400 + 0xDC00)
-		)
-	);
-}
-
-function _Char_toUpper(char)
-{
-	return _Utils_chr(char.toUpperCase());
-}
-
-function _Char_toLower(char)
-{
-	return _Utils_chr(char.toLowerCase());
-}
-
-function _Char_toLocaleUpper(char)
-{
-	return _Utils_chr(char.toLocaleUpperCase());
-}
-
-function _Char_toLocaleLower(char)
-{
-	return _Utils_chr(char.toLocaleLowerCase());
-}
 
 
 
@@ -2418,6 +2418,151 @@ function _Platform_mergeExportsDebug(moduleName, obj, exports)
 			: (obj[name] = exports[name]);
 	}
 }
+
+
+
+// DECODER
+
+var _File_decoder = _Json_decodePrim(function(value) {
+	// NOTE: checks if `File` exists in case this is run on node
+	return (typeof File === 'function' && value instanceof File)
+		? elm$core$Result$Ok(value)
+		: _Json_expecting('a FILE', value);
+});
+
+
+// METADATA
+
+function _File_name(file) { return file.name; }
+function _File_mime(file) { return file.type; }
+function _File_size(file) { return file.size; }
+
+function _File_lastModified(file)
+{
+	return elm$time$Time$millisToPosix(file.lastModified);
+}
+
+
+// DOWNLOAD
+
+var _File_downloadNode;
+
+function _File_getDownloadNode()
+{
+	return _File_downloadNode || (_File_downloadNode = document.createElementNS('http://www.w3.org/1999/xhtml', 'a'));
+}
+
+var _File_download = F3(function(name, mime, content)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var blob = new Blob([content], {type: mime});
+
+		// for IE10+
+		if (navigator.msSaveOrOpenBlob)
+		{
+			navigator.msSaveOrOpenBlob(blob, name);
+			return;
+		}
+
+		// for HTML5
+		var node = _File_getDownloadNode();
+		var objectUrl = URL.createObjectURL(blob);
+		node.setAttribute('href', objectUrl);
+		node.setAttribute('download', name);
+		node.dispatchEvent(new MouseEvent('click'));
+		URL.revokeObjectURL(objectUrl);
+	});
+});
+
+function _File_downloadUrl(href)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = _File_getDownloadNode();
+		node.setAttribute('href', href);
+		node.setAttribute('download', '');
+		node.dispatchEvent(new MouseEvent('click'));
+	});
+}
+
+
+// UPLOAD
+
+function _File_uploadOne(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = document.createElementNS('http://www.w3.org/1999/xhtml', 'input');
+		node.setAttribute('type', 'file');
+		node.setAttribute('accept', A2(elm$core$String$join, ',', mimes));
+		node.addEventListener('change', function(event)
+		{
+			callback(_Scheduler_succeed(event.target.files[0]));
+		});
+		node.dispatchEvent(new MouseEvent('click'));
+	});
+}
+
+function _File_uploadOneOrMore(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = document.createElementNS('http://www.w3.org/1999/xhtml', 'input');
+		node.setAttribute('type', 'file');
+		node.setAttribute('accept', A2(elm$core$String$join, ',', mimes));
+		node.setAttribute('multiple', '');
+		node.addEventListener('change', function(event)
+		{
+			var elmFiles = _List_fromArray(event.target.files);
+			callback(_Scheduler_succeed(_Utils_Tuple2(elmFiles.a, elmFiles.b)));
+		});
+		node.dispatchEvent(new MouseEvent('click'));
+	});
+}
+
+
+// CONTENT
+
+function _File_toString(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsText(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toBytes(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(new DataView(reader.result)));
+		});
+		reader.readAsArrayBuffer(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toUrl(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsDataURL(blob);
+		return function() { reader.abort(); };
+	});
+}
+
 
 
 
@@ -4455,6 +4600,7 @@ function _Browser_load(url)
 	}));
 }
 var elm$core$Basics$False = {$: 'False'};
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$LT = {$: 'LT'};
 var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4553,241 +4699,17 @@ var author$project$Main$initialModel = {
 			{key: 'Test 10', value: 'Test10'}
 		]),
 	selected: {key: '', value: ''},
+	selectedFile: elm$core$Maybe$Nothing,
 	selectedOpen: false
 };
-var elm$core$Basics$not = _Basics_not;
-var author$project$Main$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'Input':
-				var val = msg.a;
-				return _Utils_update(
-					model,
-					{input: val});
-			case 'Check':
-				return _Utils_update(
-					model,
-					{checked: !model.checked});
-			case 'Select':
-				var option = msg.a;
-				return _Utils_update(
-					model,
-					{selected: option, selectedOpen: !model.selectedOpen});
-			case 'ToggleModal':
-				var direction = msg.a;
-				return _Utils_update(
-					model,
-					{modalOpen: direction});
-			default:
-				return model;
-		}
-	});
-var elm$core$Basics$apR = F2(
-	function (x, f) {
-		return f(x);
-	});
-var elm$core$Basics$append = _Utils_append;
-var rtfeldman$elm_css$Css$Preprocess$AppendProperty = function (a) {
-	return {$: 'AppendProperty', a: a};
-};
-var rtfeldman$elm_css$Css$property = F2(
-	function (key, value) {
-		return rtfeldman$elm_css$Css$Preprocess$AppendProperty(key + (':' + value));
-	});
-var rtfeldman$elm_css$Css$backgroundColor = function (c) {
-	return A2(rtfeldman$elm_css$Css$property, 'background-color', c.value);
-};
-var rtfeldman$elm_css$Css$prop1 = F2(
-	function (key, arg) {
-		return A2(rtfeldman$elm_css$Css$property, key, arg.value);
-	});
-var rtfeldman$elm_css$Css$borderRadius = rtfeldman$elm_css$Css$prop1('border-radius');
-var rtfeldman$elm_css$Css$color = function (c) {
-	return A2(rtfeldman$elm_css$Css$property, 'color', c.value);
-};
-var elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
-	});
 var elm$core$Basics$True = {$: 'True'};
-var elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
 		return true;
 	} else {
 		return false;
 	}
 };
-var elm$core$Basics$add = _Basics_add;
-var elm$core$Basics$gt = _Utils_gt;
-var elm$core$List$foldl = F3(
-	function (func, acc, list) {
-		foldl:
-		while (true) {
-			if (!list.b) {
-				return acc;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				var $temp$func = func,
-					$temp$acc = A2(func, x, acc),
-					$temp$list = xs;
-				func = $temp$func;
-				acc = $temp$acc;
-				list = $temp$list;
-				continue foldl;
-			}
-		}
-	});
-var elm$core$List$reverse = function (list) {
-	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
-};
-var elm$core$List$foldrHelper = F4(
-	function (fn, acc, ctr, ls) {
-		if (!ls.b) {
-			return acc;
-		} else {
-			var a = ls.a;
-			var r1 = ls.b;
-			if (!r1.b) {
-				return A2(fn, a, acc);
-			} else {
-				var b = r1.a;
-				var r2 = r1.b;
-				if (!r2.b) {
-					return A2(
-						fn,
-						a,
-						A2(fn, b, acc));
-				} else {
-					var c = r2.a;
-					var r3 = r2.b;
-					if (!r3.b) {
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(fn, c, acc)));
-					} else {
-						var d = r3.a;
-						var r4 = r3.b;
-						var res = (ctr > 500) ? A3(
-							elm$core$List$foldl,
-							fn,
-							acc,
-							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
-						return A2(
-							fn,
-							a,
-							A2(
-								fn,
-								b,
-								A2(
-									fn,
-									c,
-									A2(fn, d, res))));
-					}
-				}
-			}
-		}
-	});
-var elm$core$List$foldr = F3(
-	function (fn, acc, ls) {
-		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
-	});
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
-var elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
-var elm$core$String$join = F2(
-	function (sep, chunks) {
-		return A2(
-			_String_join,
-			sep,
-			_List_toArray(chunks));
-	});
-var rtfeldman$elm_css$Css$stringsToValue = function (list) {
-	return elm$core$List$isEmpty(list) ? {value: 'none'} : {
-		value: A2(
-			elm$core$String$join,
-			', ',
-			A2(
-				elm$core$List$map,
-				function (s) {
-					return s;
-				},
-				list))
-	};
-};
-var rtfeldman$elm_css$Css$fontFamilies = A2(
-	elm$core$Basics$composeL,
-	rtfeldman$elm_css$Css$prop1('font-family'),
-	rtfeldman$elm_css$Css$stringsToValue);
-var rtfeldman$elm_css$Css$fontSize = rtfeldman$elm_css$Css$prop1('font-size');
-var rtfeldman$elm_css$Css$height = rtfeldman$elm_css$Css$prop1('height');
-var rtfeldman$elm_css$Css$prop2 = F3(
-	function (key, argA, argB) {
-		return A2(
-			rtfeldman$elm_css$Css$property,
-			key,
-			A2(
-				elm$core$String$join,
-				' ',
-				_List_fromArray(
-					[argA.value, argB.value])));
-	});
-var rtfeldman$elm_css$Css$padding2 = rtfeldman$elm_css$Css$prop2('padding');
-var rtfeldman$elm_css$Css$PxUnits = {$: 'PxUnits'};
-var elm$core$String$fromFloat = _String_fromNumber;
-var rtfeldman$elm_css$Css$Structure$Compatible = {$: 'Compatible'};
-var rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
-	function (units, unitLabel, numericValue) {
-		return {
-			absoluteLength: rtfeldman$elm_css$Css$Structure$Compatible,
-			calc: rtfeldman$elm_css$Css$Structure$Compatible,
-			flexBasis: rtfeldman$elm_css$Css$Structure$Compatible,
-			fontSize: rtfeldman$elm_css$Css$Structure$Compatible,
-			length: rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrAuto: rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrAutoOrCoverOrContain: rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrMinMaxDimension: rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNone: rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNoneOrMinMaxDimension: rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNumber: rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNumberOrAutoOrNoneOrContent: rtfeldman$elm_css$Css$Structure$Compatible,
-			numericValue: numericValue,
-			textIndent: rtfeldman$elm_css$Css$Structure$Compatible,
-			unitLabel: unitLabel,
-			units: units,
-			value: _Utils_ap(
-				elm$core$String$fromFloat(numericValue),
-				unitLabel)
-		};
-	});
-var rtfeldman$elm_css$Css$px = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$PxUnits, 'px');
-var rtfeldman$elm_css$VirtualDom$Styled$Node = F3(
-	function (a, b, c) {
-		return {$: 'Node', a: a, b: b, c: c};
-	});
-var rtfeldman$elm_css$VirtualDom$Styled$node = rtfeldman$elm_css$VirtualDom$Styled$Node;
-var rtfeldman$elm_css$Html$Styled$node = rtfeldman$elm_css$VirtualDom$Styled$node;
-var rtfeldman$elm_css$Html$Styled$button = rtfeldman$elm_css$Html$Styled$node('button');
 var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
@@ -4811,6 +4733,28 @@ var elm$core$Array$SubTree = function (a) {
 	return {$: 'SubTree', a: a};
 };
 var elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
+var elm$core$List$foldl = F3(
+	function (func, acc, list) {
+		foldl:
+		while (true) {
+			if (!list.b) {
+				return acc;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var $temp$func = func,
+					$temp$acc = A2(func, x, acc),
+					$temp$list = xs;
+				func = $temp$func;
+				acc = $temp$acc;
+				list = $temp$list;
+				continue foldl;
+			}
+		}
+	});
+var elm$core$List$reverse = function (list) {
+	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
+};
 var elm$core$Array$compressNodes = F2(
 	function (nodes, acc) {
 		compressNodes:
@@ -4833,6 +4777,10 @@ var elm$core$Array$compressNodes = F2(
 			}
 		}
 	});
+var elm$core$Basics$apR = F2(
+	function (x, f) {
+		return f(x);
+	});
 var elm$core$Basics$eq = _Utils_equal;
 var elm$core$Tuple$first = function (_n0) {
 	var x = _n0.a;
@@ -4854,11 +4802,13 @@ var elm$core$Array$treeFromBuilder = F2(
 			}
 		}
 	});
+var elm$core$Basics$add = _Basics_add;
 var elm$core$Basics$apL = F2(
 	function (f, x) {
 		return f(x);
 	});
 var elm$core$Basics$floor = _Basics_floor;
+var elm$core$Basics$gt = _Utils_gt;
 var elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
@@ -4931,18 +4881,14 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
+var elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
 var elm$core$Result$Ok = function (a) {
 	return {$: 'Ok', a: a};
-};
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
 };
 var elm$json$Json$Decode$Failure = F2(
 	function (a, b) {
@@ -4960,6 +4906,7 @@ var elm$json$Json$Decode$OneOf = function (a) {
 	return {$: 'OneOf', a: a};
 };
 var elm$core$Basics$and = _Basics_and;
+var elm$core$Basics$append = _Utils_append;
 var elm$core$Basics$or = _Basics_or;
 var elm$core$Char$toCode = _Char_toCode;
 var elm$core$Char$isLower = function (_char) {
@@ -5025,6 +4972,13 @@ var elm$core$List$indexedMap = F2(
 	});
 var elm$core$String$all = _String_all;
 var elm$core$String$fromInt = _String_fromNumber;
+var elm$core$String$join = F2(
+	function (sep, chunks) {
+		return A2(
+			_String_join,
+			sep,
+			_List_toArray(chunks));
+	});
 var elm$core$String$uncons = _String_uncons;
 var elm$core$String$split = F2(
 	function (sep, string) {
@@ -5141,10 +5095,329 @@ var elm$json$Json$Decode$errorToStringHelp = F2(
 			}
 		}
 	});
-var elm$json$Json$Encode$string = _Json_wrap;
+var elm$core$Platform$Cmd$batch = _Platform_batch;
+var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
+var author$project$Main$init = function (_n0) {
+	return _Utils_Tuple2(author$project$Main$initialModel, elm$core$Platform$Cmd$none);
+};
+var elm$core$Platform$Sub$batch = _Platform_batch;
+var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
+var author$project$Main$subscriptions = function (model) {
+	return elm$core$Platform$Sub$none;
+};
+var author$project$Main$FileLoaded = function (a) {
+	return {$: 'FileLoaded', a: a};
+};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
+var elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var elm$core$Task$succeed = _Scheduler_succeed;
+var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
+var elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							elm$core$List$foldl,
+							fn,
+							acc,
+							elm$core$List$reverse(r4)) : A4(elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$Task$andThen = _Scheduler_andThen;
+var elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var elm$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			elm$core$Task$andThen,
+			function (a) {
+				return A2(
+					elm$core$Task$andThen,
+					function (b) {
+						return elm$core$Task$succeed(
+							A2(func, a, b));
+					},
+					taskB);
+			},
+			taskA);
+	});
+var elm$core$Task$sequence = function (tasks) {
+	return A3(
+		elm$core$List$foldr,
+		elm$core$Task$map2(elm$core$List$cons),
+		elm$core$Task$succeed(_List_Nil),
+		tasks);
+};
+var elm$core$Platform$sendToApp = _Platform_sendToApp;
+var elm$core$Task$spawnCmd = F2(
+	function (router, _n0) {
+		var task = _n0.a;
+		return _Scheduler_spawn(
+			A2(
+				elm$core$Task$andThen,
+				elm$core$Platform$sendToApp(router),
+				task));
+	});
+var elm$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			elm$core$Task$map,
+			function (_n0) {
+				return _Utils_Tuple0;
+			},
+			elm$core$Task$sequence(
+				A2(
+					elm$core$List$map,
+					elm$core$Task$spawnCmd(router),
+					commands)));
+	});
+var elm$core$Task$onSelfMsg = F3(
+	function (_n0, _n1, _n2) {
+		return elm$core$Task$succeed(_Utils_Tuple0);
+	});
+var elm$core$Task$cmdMap = F2(
+	function (tagger, _n0) {
+		var task = _n0.a;
+		return elm$core$Task$Perform(
+			A2(elm$core$Task$map, tagger, task));
+	});
+_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
+var elm$core$Task$command = _Platform_leaf('Task');
+var elm$core$Task$perform = F2(
+	function (toMessage, task) {
+		return elm$core$Task$command(
+			elm$core$Task$Perform(
+				A2(elm$core$Task$map, toMessage, task)));
+	});
+var elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var elm$time$Time$millisToPosix = elm$time$Time$Posix;
+var elm$file$File$Select$file = F2(
+	function (mimes, toMsg) {
+		return A2(
+			elm$core$Task$perform,
+			toMsg,
+			_File_uploadOne(mimes));
+	});
+var author$project$Main$selectFile = A2(
+	elm$file$File$Select$file,
+	_List_fromArray(
+		['text/plain']),
+	author$project$Main$FileLoaded);
+var elm$core$Basics$not = _Basics_not;
+var author$project$Main$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'Input':
+				var val = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{input: val}),
+					elm$core$Platform$Cmd$none);
+			case 'Check':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{checked: !model.checked}),
+					elm$core$Platform$Cmd$none);
+			case 'Select':
+				var option = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{selected: option, selectedOpen: !model.selectedOpen}),
+					elm$core$Platform$Cmd$none);
+			case 'ToggleModal':
+				var direction = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{modalOpen: direction}),
+					elm$core$Platform$Cmd$none);
+			case 'SelectFile':
+				return _Utils_Tuple2(model, author$project$Main$selectFile);
+			case 'FileLoaded':
+				var file = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							selectedFile: elm$core$Maybe$Just(file)
+						}),
+					elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+		}
+	});
+var rtfeldman$elm_css$Css$Preprocess$AppendProperty = function (a) {
+	return {$: 'AppendProperty', a: a};
+};
+var rtfeldman$elm_css$Css$property = F2(
+	function (key, value) {
+		return rtfeldman$elm_css$Css$Preprocess$AppendProperty(key + (':' + value));
+	});
+var rtfeldman$elm_css$Css$backgroundColor = function (c) {
+	return A2(rtfeldman$elm_css$Css$property, 'background-color', c.value);
+};
+var rtfeldman$elm_css$Css$prop1 = F2(
+	function (key, arg) {
+		return A2(rtfeldman$elm_css$Css$property, key, arg.value);
+	});
+var rtfeldman$elm_css$Css$borderRadius = rtfeldman$elm_css$Css$prop1('border-radius');
+var rtfeldman$elm_css$Css$color = function (c) {
+	return A2(rtfeldman$elm_css$Css$property, 'color', c.value);
+};
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var rtfeldman$elm_css$Css$stringsToValue = function (list) {
+	return elm$core$List$isEmpty(list) ? {value: 'none'} : {
+		value: A2(
+			elm$core$String$join,
+			', ',
+			A2(
+				elm$core$List$map,
+				function (s) {
+					return s;
+				},
+				list))
+	};
+};
+var rtfeldman$elm_css$Css$fontFamilies = A2(
+	elm$core$Basics$composeL,
+	rtfeldman$elm_css$Css$prop1('font-family'),
+	rtfeldman$elm_css$Css$stringsToValue);
+var rtfeldman$elm_css$Css$fontSize = rtfeldman$elm_css$Css$prop1('font-size');
+var rtfeldman$elm_css$Css$height = rtfeldman$elm_css$Css$prop1('height');
+var rtfeldman$elm_css$Css$prop2 = F3(
+	function (key, argA, argB) {
+		return A2(
+			rtfeldman$elm_css$Css$property,
+			key,
+			A2(
+				elm$core$String$join,
+				' ',
+				_List_fromArray(
+					[argA.value, argB.value])));
+	});
+var rtfeldman$elm_css$Css$padding2 = rtfeldman$elm_css$Css$prop2('padding');
+var rtfeldman$elm_css$Css$PxUnits = {$: 'PxUnits'};
+var elm$core$String$fromFloat = _String_fromNumber;
+var rtfeldman$elm_css$Css$Structure$Compatible = {$: 'Compatible'};
+var rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
+	function (units, unitLabel, numericValue) {
+		return {
+			absoluteLength: rtfeldman$elm_css$Css$Structure$Compatible,
+			calc: rtfeldman$elm_css$Css$Structure$Compatible,
+			flexBasis: rtfeldman$elm_css$Css$Structure$Compatible,
+			fontSize: rtfeldman$elm_css$Css$Structure$Compatible,
+			length: rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrAuto: rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrAutoOrCoverOrContain: rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrMinMaxDimension: rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNone: rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNoneOrMinMaxDimension: rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNumber: rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNumberOrAutoOrNoneOrContent: rtfeldman$elm_css$Css$Structure$Compatible,
+			numericValue: numericValue,
+			textIndent: rtfeldman$elm_css$Css$Structure$Compatible,
+			unitLabel: unitLabel,
+			units: units,
+			value: _Utils_ap(
+				elm$core$String$fromFloat(numericValue),
+				unitLabel)
+		};
+	});
+var rtfeldman$elm_css$Css$px = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$PxUnits, 'px');
+var rtfeldman$elm_css$VirtualDom$Styled$Node = F3(
+	function (a, b, c) {
+		return {$: 'Node', a: a, b: b, c: c};
+	});
+var rtfeldman$elm_css$VirtualDom$Styled$node = rtfeldman$elm_css$VirtualDom$Styled$Node;
+var rtfeldman$elm_css$Html$Styled$node = rtfeldman$elm_css$VirtualDom$Styled$node;
+var rtfeldman$elm_css$Html$Styled$button = rtfeldman$elm_css$Html$Styled$node('button');
+var elm$json$Json$Encode$string = _Json_wrap;
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$json$Json$Decode$succeed = _Json_succeed;
@@ -8155,8 +8428,198 @@ var author$project$Checkbox$checkbox = F4(
 				]));
 	});
 var author$project$Checkbox$defaultCheckbox = {checked: false, kind: author$project$Theme$Primary, size: author$project$Theme$Medium};
-var author$project$Input$defaultInput = {};
+var author$project$FileInput$defaultFileInput = {
+	file: elm$core$Maybe$Nothing,
+	kind: author$project$Theme$Primary,
+	size: author$project$Theme$Medium,
+	text: rtfeldman$elm_css$Css$hex('#FFF')
+};
+var author$project$FileInput$button = F2(
+	function (theme, model) {
+		var bg = function () {
+			var _n2 = model.kind;
+			switch (_n2.$) {
+				case 'Primary':
+					return theme.primary;
+				case 'Secondary':
+					return theme.secondary;
+				case 'Warning':
+					return theme.warning;
+				case 'Success':
+					return theme.success;
+				default:
+					return theme.danger;
+			}
+		}();
+		var _n0 = function () {
+			var _n1 = model.size;
+			switch (_n1.$) {
+				case 'Small':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(12),
+						rtfeldman$elm_css$Css$px(26));
+				case 'Medium':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(24),
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(36));
+				default:
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(30),
+						rtfeldman$elm_css$Css$px(22),
+						rtfeldman$elm_css$Css$px(50));
+			}
+		}();
+		var p = _n0.a;
+		var fs = _n0.b;
+		var h = _n0.c;
+		return A2(
+			rtfeldman$elm_css$Html$Styled$styled,
+			rtfeldman$elm_css$Html$Styled$button,
+			_List_fromArray(
+				[
+					rtfeldman$elm_css$Css$backgroundColor(bg),
+					rtfeldman$elm_css$Css$color(model.text),
+					rtfeldman$elm_css$Css$borderRadius(
+					rtfeldman$elm_css$Css$px(2)),
+					A2(
+					rtfeldman$elm_css$Css$padding2,
+					rtfeldman$elm_css$Css$px(0),
+					p),
+					rtfeldman$elm_css$Css$height(h),
+					rtfeldman$elm_css$Css$fontSize(fs),
+					rtfeldman$elm_css$Css$fontFamilies(theme.font)
+				]));
+	});
+var rtfeldman$elm_css$Css$ellipsis = {textOverflow: rtfeldman$elm_css$Css$Structure$Compatible, value: 'ellipsis'};
+var rtfeldman$elm_css$Css$flex = rtfeldman$elm_css$Css$prop1('flex');
+var rtfeldman$elm_css$Css$hidden = {borderStyle: rtfeldman$elm_css$Css$Structure$Compatible, overflow: rtfeldman$elm_css$Css$Structure$Compatible, value: 'hidden', visibility: rtfeldman$elm_css$Css$Structure$Compatible};
 var rtfeldman$elm_css$Css$lineHeight = rtfeldman$elm_css$Css$prop1('line-height');
+var rtfeldman$elm_css$Css$noWrap = {flexDirectionOrWrap: rtfeldman$elm_css$Css$Structure$Compatible, flexWrap: rtfeldman$elm_css$Css$Structure$Compatible, value: 'nowrap', whiteSpace: rtfeldman$elm_css$Css$Structure$Compatible};
+var rtfeldman$elm_css$Css$overflow = rtfeldman$elm_css$Css$prop1('overflow');
+var rtfeldman$elm_css$Css$textOverflow = rtfeldman$elm_css$Css$prop1('text-overflow');
+var rtfeldman$elm_css$Css$whiteSpace = rtfeldman$elm_css$Css$prop1('white-space');
+var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div');
+var author$project$FileInput$name = A2(
+	rtfeldman$elm_css$Html$Styled$styled,
+	rtfeldman$elm_css$Html$Styled$div,
+	_List_fromArray(
+		[
+			rtfeldman$elm_css$Css$textOverflow(rtfeldman$elm_css$Css$ellipsis),
+			rtfeldman$elm_css$Css$whiteSpace(rtfeldman$elm_css$Css$noWrap),
+			rtfeldman$elm_css$Css$overflow(rtfeldman$elm_css$Css$hidden),
+			A2(
+			rtfeldman$elm_css$Css$padding2,
+			rtfeldman$elm_css$Css$zero,
+			rtfeldman$elm_css$Css$px(10)),
+			rtfeldman$elm_css$Css$lineHeight(
+			rtfeldman$elm_css$Css$px(34)),
+			rtfeldman$elm_css$Css$cursor(rtfeldman$elm_css$Css$pointer),
+			rtfeldman$elm_css$Css$flex(
+			rtfeldman$elm_css$Css$int(1))
+		]));
+var elm$file$File$name = _File_name;
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
+	return {$: 'Unstyled', a: a};
+};
+var rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
+	return rtfeldman$elm_css$VirtualDom$Styled$Unstyled(
+		elm$virtual_dom$VirtualDom$text(str));
+};
+var rtfeldman$elm_css$Html$Styled$text = rtfeldman$elm_css$VirtualDom$Styled$text;
+var author$project$FileInput$fileInput = F4(
+	function (theme, model, attr, inner) {
+		var fileName = function () {
+			var _n3 = model.file;
+			if (_n3.$ === 'Just') {
+				var file = _n3.a;
+				return elm$file$File$name(file);
+			} else {
+				return 'No file selected';
+			}
+		}();
+		var bg = function () {
+			var _n2 = model.kind;
+			switch (_n2.$) {
+				case 'Primary':
+					return theme.primary;
+				case 'Secondary':
+					return theme.secondary;
+				case 'Warning':
+					return theme.warning;
+				case 'Success':
+					return theme.success;
+				default:
+					return theme.danger;
+			}
+		}();
+		var _n0 = function () {
+			var _n1 = model.size;
+			switch (_n1.$) {
+				case 'Small':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(12),
+						rtfeldman$elm_css$Css$px(26));
+				case 'Medium':
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(24),
+						rtfeldman$elm_css$Css$px(16),
+						rtfeldman$elm_css$Css$px(36));
+				default:
+					return _Utils_Tuple3(
+						rtfeldman$elm_css$Css$px(30),
+						rtfeldman$elm_css$Css$px(22),
+						rtfeldman$elm_css$Css$px(50));
+			}
+		}();
+		var p = _n0.a;
+		var fs = _n0.b;
+		var h = _n0.c;
+		return A4(
+			rtfeldman$elm_css$Html$Styled$styled,
+			rtfeldman$elm_css$Html$Styled$div,
+			_List_fromArray(
+				[
+					A3(
+					rtfeldman$elm_css$Css$border3,
+					rtfeldman$elm_css$Css$px(1),
+					rtfeldman$elm_css$Css$solid,
+					rtfeldman$elm_css$Css$hex('#DDD')),
+					rtfeldman$elm_css$Css$backgroundColor(
+					rtfeldman$elm_css$Css$hex('#FDFDFD')),
+					rtfeldman$elm_css$Css$borderRadius(
+					rtfeldman$elm_css$Css$px(2)),
+					rtfeldman$elm_css$Css$color(
+					rtfeldman$elm_css$Css$hex('#707070')),
+					rtfeldman$elm_css$Css$fontFamilies(theme.font),
+					rtfeldman$elm_css$Css$height(h),
+					rtfeldman$elm_css$Css$displayFlex
+				]),
+			attr,
+			_List_fromArray(
+				[
+					A2(
+					author$project$FileInput$name,
+					_List_Nil,
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$text(fileName)
+						])),
+					A4(
+					author$project$FileInput$button,
+					theme,
+					model,
+					_List_Nil,
+					_List_fromArray(
+						[
+							rtfeldman$elm_css$Html$Styled$text('Browse')
+						]))
+				]));
+	});
+var author$project$Input$defaultInput = {};
 var rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
 var rtfeldman$elm_css$Css$pct = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$PercentageUnits, '%');
 var rtfeldman$elm_css$Html$Styled$input = rtfeldman$elm_css$Html$Styled$node('input');
@@ -8233,6 +8696,7 @@ var author$project$Main$Input = function (a) {
 var author$project$Main$Select = function (a) {
 	return {$: 'Select', a: a};
 };
+var author$project$Main$SelectFile = {$: 'SelectFile'};
 var author$project$Main$ToggleModal = function (a) {
 	return {$: 'ToggleModal', a: a};
 };
@@ -8285,7 +8749,6 @@ var rtfeldman$elm_css$Css$vh = A2(rtfeldman$elm_css$Css$Internal$lengthConverter
 var rtfeldman$elm_css$Css$VwUnits = {$: 'VwUnits'};
 var rtfeldman$elm_css$Css$vw = A2(rtfeldman$elm_css$Css$Internal$lengthConverter, rtfeldman$elm_css$Css$VwUnits, 'vw');
 var rtfeldman$elm_css$Css$zIndex = rtfeldman$elm_css$Css$prop1('z-index');
-var rtfeldman$elm_css$Html$Styled$div = rtfeldman$elm_css$Html$Styled$node('div');
 var author$project$Modal$modalContent = F2(
 	function (theme, model) {
 		return A2(
@@ -8530,7 +8993,6 @@ var author$project$Navbar$lighten = F2(
 			elm$core$Basics$round(color.blue + (amount * color.blue)));
 		return A3(rtfeldman$elm_css$Css$rgb, r, g, b);
 	});
-var rtfeldman$elm_css$Css$flex = rtfeldman$elm_css$Css$prop1('flex');
 var author$project$Navbar$spacer = A2(
 	rtfeldman$elm_css$Html$Styled$styled,
 	rtfeldman$elm_css$Html$Styled$div,
@@ -8613,15 +9075,6 @@ var rtfeldman$elm_css$Css$relative = {position: rtfeldman$elm_css$Css$Structure$
 var rtfeldman$elm_css$Css$stop = function (c) {
 	return _Utils_Tuple2(c, elm$core$Maybe$Nothing);
 };
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
-	return {$: 'Unstyled', a: a};
-};
-var rtfeldman$elm_css$VirtualDom$Styled$text = function (str) {
-	return rtfeldman$elm_css$VirtualDom$Styled$Unstyled(
-		elm$virtual_dom$VirtualDom$text(str));
-};
-var rtfeldman$elm_css$Html$Styled$text = rtfeldman$elm_css$VirtualDom$Styled$text;
 var author$project$Navbar$navbar = F4(
 	function (theme, model, attr, inner) {
 		var bg = function () {
@@ -8752,14 +9205,8 @@ var author$project$Selector$getColor = F2(
 				return theme.danger;
 		}
 	});
-var rtfeldman$elm_css$Css$ellipsis = {textOverflow: rtfeldman$elm_css$Css$Structure$Compatible, value: 'ellipsis'};
-var rtfeldman$elm_css$Css$hidden = {borderStyle: rtfeldman$elm_css$Css$Structure$Compatible, overflow: rtfeldman$elm_css$Css$Structure$Compatible, value: 'hidden', visibility: rtfeldman$elm_css$Css$Structure$Compatible};
 var rtfeldman$elm_css$Css$hover = rtfeldman$elm_css$Css$pseudoClass('hover');
-var rtfeldman$elm_css$Css$noWrap = {flexDirectionOrWrap: rtfeldman$elm_css$Css$Structure$Compatible, flexWrap: rtfeldman$elm_css$Css$Structure$Compatible, value: 'nowrap', whiteSpace: rtfeldman$elm_css$Css$Structure$Compatible};
-var rtfeldman$elm_css$Css$overflow = rtfeldman$elm_css$Css$prop1('overflow');
 var rtfeldman$elm_css$Css$padding4 = rtfeldman$elm_css$Css$prop4('padding');
-var rtfeldman$elm_css$Css$textOverflow = rtfeldman$elm_css$Css$prop1('text-overflow');
-var rtfeldman$elm_css$Css$whiteSpace = rtfeldman$elm_css$Css$prop1('white-space');
 var author$project$Selector$dropdownItem = F4(
 	function (theme, model, option, attrs) {
 		var selectedStyles = _Utils_eq(option.key, model.selected.key) ? _List_fromArray(
@@ -9556,13 +10003,20 @@ var author$project$Main$view = function (model) {
 							[
 								rtfeldman$elm_css$Html$Styled$text('Sad 3')
 							]))
-					]))
+					])),
+				A4(
+				author$project$FileInput$fileInput,
+				author$project$Theme$defaultTheme,
+				_Utils_update(
+					author$project$FileInput$defaultFileInput,
+					{file: model.selectedFile, kind: author$project$Theme$Danger}),
+				_List_fromArray(
+					[
+						author$project$Main$onClick(author$project$Main$SelectFile)
+					]),
+				_List_Nil)
 			]));
 };
-var elm$core$Platform$Cmd$batch = _Platform_batch;
-var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
-var elm$core$Platform$Sub$batch = _Platform_batch;
-var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var elm$browser$Browser$External = function (a) {
 	return {$: 'External', a: a};
 };
@@ -9581,85 +10035,6 @@ var elm$core$Basics$never = function (_n0) {
 		continue never;
 	}
 };
-var elm$core$Task$Perform = function (a) {
-	return {$: 'Perform', a: a};
-};
-var elm$core$Task$succeed = _Scheduler_succeed;
-var elm$core$Task$init = elm$core$Task$succeed(_Utils_Tuple0);
-var elm$core$Task$andThen = _Scheduler_andThen;
-var elm$core$Task$map = F2(
-	function (func, taskA) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return elm$core$Task$succeed(
-					func(a));
-			},
-			taskA);
-	});
-var elm$core$Task$map2 = F3(
-	function (func, taskA, taskB) {
-		return A2(
-			elm$core$Task$andThen,
-			function (a) {
-				return A2(
-					elm$core$Task$andThen,
-					function (b) {
-						return elm$core$Task$succeed(
-							A2(func, a, b));
-					},
-					taskB);
-			},
-			taskA);
-	});
-var elm$core$Task$sequence = function (tasks) {
-	return A3(
-		elm$core$List$foldr,
-		elm$core$Task$map2(elm$core$List$cons),
-		elm$core$Task$succeed(_List_Nil),
-		tasks);
-};
-var elm$core$Platform$sendToApp = _Platform_sendToApp;
-var elm$core$Task$spawnCmd = F2(
-	function (router, _n0) {
-		var task = _n0.a;
-		return _Scheduler_spawn(
-			A2(
-				elm$core$Task$andThen,
-				elm$core$Platform$sendToApp(router),
-				task));
-	});
-var elm$core$Task$onEffects = F3(
-	function (router, commands, state) {
-		return A2(
-			elm$core$Task$map,
-			function (_n0) {
-				return _Utils_Tuple0;
-			},
-			elm$core$Task$sequence(
-				A2(
-					elm$core$List$map,
-					elm$core$Task$spawnCmd(router),
-					commands)));
-	});
-var elm$core$Task$onSelfMsg = F3(
-	function (_n0, _n1, _n2) {
-		return elm$core$Task$succeed(_Utils_Tuple0);
-	});
-var elm$core$Task$cmdMap = F2(
-	function (tagger, _n0) {
-		var task = _n0.a;
-		return elm$core$Task$Perform(
-			A2(elm$core$Task$map, tagger, task));
-	});
-_Platform_effectManagers['Task'] = _Platform_createManager(elm$core$Task$init, elm$core$Task$onEffects, elm$core$Task$onSelfMsg, elm$core$Task$cmdMap);
-var elm$core$Task$command = _Platform_leaf('Task');
-var elm$core$Task$perform = F2(
-	function (toMessage, task) {
-		return elm$core$Task$command(
-			elm$core$Task$Perform(
-				A2(elm$core$Task$map, toMessage, task)));
-	});
 var elm$url$Url$Http = {$: 'Http'};
 var elm$url$Url$Https = {$: 'Https'};
 var elm$core$String$indexes = _String_indexes;
@@ -9775,24 +10150,7 @@ var elm$url$Url$fromString = function (str) {
 		elm$url$Url$Https,
 		A2(elm$core$String$dropLeft, 8, str)) : elm$core$Maybe$Nothing);
 };
-var elm$browser$Browser$sandbox = function (impl) {
-	return _Browser_element(
-		{
-			init: function (_n0) {
-				return _Utils_Tuple2(impl.init, elm$core$Platform$Cmd$none);
-			},
-			subscriptions: function (_n1) {
-				return elm$core$Platform$Sub$none;
-			},
-			update: F2(
-				function (msg, model) {
-					return _Utils_Tuple2(
-						A2(impl.update, msg, model),
-						elm$core$Platform$Cmd$none);
-				}),
-			view: impl.view
-		});
-};
+var elm$browser$Browser$element = _Browser_element;
 var elm$virtual_dom$VirtualDom$node = function (tag) {
 	return _VirtualDom_node(
 		_VirtualDom_noScript(tag));
@@ -10274,9 +10632,10 @@ var rtfeldman$elm_css$VirtualDom$Styled$toUnstyled = function (vdom) {
 	}
 };
 var rtfeldman$elm_css$Html$Styled$toUnstyled = rtfeldman$elm_css$VirtualDom$Styled$toUnstyled;
-var author$project$Main$main = elm$browser$Browser$sandbox(
+var author$project$Main$main = elm$browser$Browser$element(
 	{
-		init: author$project$Main$initialModel,
+		init: author$project$Main$init,
+		subscriptions: author$project$Main$subscriptions,
 		update: author$project$Main$update,
 		view: A2(elm$core$Basics$composeR, author$project$Main$view, rtfeldman$elm_css$Html$Styled$toUnstyled)
 	});
@@ -10318,7 +10677,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61698" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59603" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

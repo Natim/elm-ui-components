@@ -1,4 +1,21 @@
-module ElmUIC.Toast exposing (Position(..), Toast, defaultToast, toast)
+module ElmUIC.Toast exposing
+    ( Toast
+    , Position(..)
+    , defaultToast
+    , toast
+    )
+
+{-| A styled toast notification
+
+@docs Toast
+
+@docs Position
+
+@docs defaultToast
+
+@docs toast
+
+-}
 
 import Css exposing (Color, absolute, backgroundColor, borderRadius, bottom, boxShadow5, calc, center, color, column, displayFlex, flexDirection, fontFamilies, fontSize, height, hex, int, justifyContent, left, margin, minus, padding, pct, position, px, right, textAlign, top, transform, translateX, translateY, zIndex, zero)
 import Css.Transitions exposing (easeInOut, transition)
@@ -6,6 +23,8 @@ import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
 
 
+{-| Base model for a toast
+-}
 type alias Toast =
     { kind : ColorSetting
     , size : Size
@@ -17,6 +36,8 @@ type alias Toast =
     }
 
 
+{-| Possible screen positions for the toast
+-}
 type Position
     = Top
     | Left
@@ -28,6 +49,11 @@ type Position
     | BottomRight
 
 
+{-| Instantiates the default properties of the toast
+
+    { defaultToast | position = Top, visible = True }
+
+-}
 defaultToast : Toast
 defaultToast =
     { kind = Primary
@@ -40,7 +66,18 @@ defaultToast =
     }
 
 
-{-| A toast notification
+{-| A styled toast notification
+
+    toast
+        defaultTheme
+        { defaultToast
+            | position = TopRight
+            , transitionDirection = TopRight
+            , visible = model.checked
+        }
+        []
+        [ text "Notify things!" ]
+
 -}
 toast : Theme -> Toast -> List (Attribute msg) -> List (Html msg) -> Html msg
 toast theme model =

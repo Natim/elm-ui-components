@@ -1,10 +1,26 @@
-module ElmUIC.Button exposing (Button, button, defaultButton)
+module ElmUIC.Button exposing
+    ( Button
+    , defaultButton
+    , button
+    )
+
+{-| A styled button
+
+@docs Button
+
+@docs defaultButton
+
+@docs button
+
+-}
 
 import Css exposing (Color, backgroundColor, borderRadius, color, fontFamilies, fontSize, height, hex, padding2, px)
 import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
 
 
+{-| Base model for a button
+-}
 type alias Button =
     { kind : ColorSetting
     , size : Size
@@ -12,6 +28,11 @@ type alias Button =
     }
 
 
+{-| Instantiates the default properties of a button
+
+    { defaultButton | text = hex "#000" }
+
+-}
 defaultButton : Button
 defaultButton =
     { kind = Primary
@@ -21,6 +42,9 @@ defaultButton =
 
 
 {-| A styled button
+
+    button defaultTheme defaultButton [] []
+
 -}
 button : Theme -> Button -> List (Attribute msg) -> List (Html msg) -> Html msg
 button theme model =

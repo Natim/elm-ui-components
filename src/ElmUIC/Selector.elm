@@ -1,4 +1,21 @@
-module ElmUIC.Selector exposing (Option, Selector, defaultSelector, dropdownItem, selector)
+module ElmUIC.Selector exposing
+    ( Selector
+    , Option
+    , defaultSelector
+    , selector
+    )
+
+{-| A styled selector
+
+@docs Selector
+
+@docs Option
+
+@docs defaultSelector
+
+@docs selector
+
+-}
 
 import Css exposing (Color, absolute, backgroundColor, block, border3, borderBox, borderRadius, boxShadow5, boxShadow6, boxSizing, color, cursor, display, displayFlex, ellipsis, flex, fontFamilies, fontSize, height, hex, hidden, hover, inherit, inset, int, lineHeight, maxHeight, noWrap, none, opacity, overflow, overflowY, padding, padding2, padding4, paddingRight, pct, pointer, position, px, relative, rgba, scroll, solid, textOverflow, top, transparent, visibility, visible, whiteSpace, width, zIndex, zero)
 import Css.Transitions exposing (linear, transition)
@@ -8,6 +25,8 @@ import Html.Styled.Attributes as Attributes exposing (css, placeholder, readonly
 import Html.Styled.Events exposing (onClick)
 
 
+{-| Base model for a selector
+-}
 type alias Selector =
     { kind : ColorSetting
     , size : Size
@@ -18,12 +37,19 @@ type alias Selector =
     }
 
 
+{-| Individual items that display in the selector
+-}
 type alias Option =
     { key : String
     , value : String
     }
 
 
+{-| Instantiates the default properties of a selector
+
+    { defaultNavbar | kind = Danger }
+
+-}
 defaultSelector : Selector
 defaultSelector =
     { kind = Primary
@@ -153,7 +179,22 @@ input theme model =
         ]
 
 
-{-| A styled select element
+{-| A styled nav using items and separators
+
+    selector defaultTheme
+        { defaultSelector
+            | placeholder = "Select a choice"
+            , open = model.selectedOpen
+            , options = model.options
+            , selected = model.selected
+            , kind = Theme.Danger
+        }
+        Select
+        [ css
+            [ width (px 200) ]
+        ]
+        []
+
 -}
 selector : Theme -> Selector -> (Option -> msg) -> List (Attribute msg) -> List (Html msg) -> Html msg
 selector theme model selectMsg attr inner =

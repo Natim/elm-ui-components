@@ -1,14 +1,35 @@
-module ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme, defaultTheme)
+module ElmUIC.Theme exposing
+    ( Size(..)
+    , ColorSetting(..)
+    , Theme
+    , defaultTheme
+    )
+
+{-| Basic theming functions for components
+
+@docs Size
+
+@docs ColorSetting
+
+@docs Theme
+
+@docs defaultTheme
+
+-}
 
 import Css exposing (Color, hex)
 
 
+{-| Used to standardize the size of your component
+-}
 type Size
     = Small
     | Medium
     | Large
 
 
+{-| Basic color options for components
+-}
 type ColorSetting
     = Primary
     | Secondary
@@ -17,6 +38,8 @@ type ColorSetting
     | Danger
 
 
+{-| Colors used to map to each ColorSetting
+-}
 type alias Theme =
     { primary : Color
     , secondary : Color
@@ -27,6 +50,8 @@ type alias Theme =
     }
 
 
+{-| The default theme for elm-ui-components
+-}
 defaultTheme : Theme
 defaultTheme =
     { primary = hex "#158DD8"

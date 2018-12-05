@@ -1,4 +1,18 @@
-module ElmUIC.Checkbox exposing (Checkbox, checkbox, defaultCheckbox)
+module ElmUIC.Checkbox exposing
+    ( Checkbox
+    , defaultCheckbox
+    , checkbox
+    )
+
+{-| A styled checkbox
+
+@docs Checkbox
+
+@docs defaultCheckbox
+
+@docs checkbox
+
+-}
 
 import Css exposing (alignItems, backgroundColor, border3, borderBox, borderRadius, boxShadow6, boxSizing, center, color, cursor, deg, display, displayFlex, fill, focus, height, hex, inlineBlock, inset, int, justifyContent, none, opacity, outline, padding, pointer, px, rotate, scale, solid, transform, transforms, translateX, translateY, transparent, width, zero)
 import Css.Transitions exposing (linear, transition)
@@ -8,6 +22,8 @@ import Svg.Styled exposing (path, svg)
 import Svg.Styled.Attributes as Svg
 
 
+{-| Base model for a checkbox
+-}
 type alias Checkbox =
     { checked : Bool
     , kind : ColorSetting
@@ -15,6 +31,11 @@ type alias Checkbox =
     }
 
 
+{-| Instantiates the default properties of a checkbox
+
+    { defaultCheckbox | checked = model.checked }
+
+-}
 defaultCheckbox : Checkbox
 defaultCheckbox =
     { checked = False
@@ -24,6 +45,12 @@ defaultCheckbox =
 
 
 {-| A styled checkbox
+
+    checkbox defaultTheme
+        { defaultCheckbox | size = Medium, checked = model.checked }
+        [ onClick Check ]
+        []
+
 -}
 checkbox : Theme -> Checkbox -> List (Attribute msg) -> List (Html msg) -> Html msg
 checkbox theme model attr inner =

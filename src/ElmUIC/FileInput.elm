@@ -1,4 +1,18 @@
-module ElmUIC.FileInput exposing (FileInput, defaultFileInput, fileInput)
+module ElmUIC.FileInput exposing
+    ( FileInput
+    , defaultFileInput
+    , fileInput
+    )
+
+{-| A styled FileInput element
+
+@docs FileInput
+
+@docs defaultFileInput
+
+@docs fileInput
+
+-}
 
 import Css exposing (Color, backgroundColor, border3, borderRadius, color, cursor, displayFlex, ellipsis, flex, fontFamilies, fontSize, height, hex, hidden, int, lineHeight, noWrap, overflow, padding2, pointer, px, solid, textOverflow, whiteSpace, zero)
 import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
@@ -6,6 +20,8 @@ import File exposing (File)
 import Html.Styled as Styled exposing (Attribute, Html, styled, text)
 
 
+{-| Base model for a fileInput
+-}
 type alias FileInput =
     { kind : ColorSetting
     , size : Size
@@ -14,6 +30,11 @@ type alias FileInput =
     }
 
 
+{-| Instantiates the default properties of the fileInput
+
+    { defaultFileInput | kind = Warning }
+
+-}
 defaultFileInput : FileInput
 defaultFileInput =
     { kind = Primary
@@ -80,7 +101,13 @@ button theme model =
         ]
 
 
-{-| A styled button
+{-| A styled file input
+
+    fileInput defaultTheme
+        { defaultFileInput | file = model.selectedFile, kind = Danger }
+        [ onClick SelectFile ]
+        []
+
 -}
 fileInput : Theme -> FileInput -> List (Attribute msg) -> List (Html msg) -> Html msg
 fileInput theme model attr inner =

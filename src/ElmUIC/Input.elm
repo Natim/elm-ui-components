@@ -1,4 +1,18 @@
-module ElmUIC.Input exposing (Input, defaultInput, input)
+module ElmUIC.Input exposing
+    ( Input
+    , defaultInput
+    , input
+    )
+
+{-| A styled full page Modal
+
+@docs Input
+
+@docs defaultInput
+
+@docs input
+
+-}
 
 import Css exposing (Color, backgroundColor, border3, borderBox, borderRadius, boxShadow6, boxSizing, color, focus, fontFamilies, fontSize, height, hex, inset, lineHeight, none, outline, padding2, pct, px, solid, transparent, width, zero)
 import Css.Transitions exposing (linear, transition)
@@ -6,16 +20,30 @@ import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled)
 
 
+{-| Base model for an input
+-}
 type alias Input =
     {}
 
 
+{-| Instantiates the default properties of a input
+
+    defaultInput
+
+-}
 defaultInput : Input
 defaultInput =
     {}
 
 
 {-| A styled input
+
+    input
+        defaultTheme
+        defaultInput
+        [ onInput Input, value model.input, placeholder "Input things" ]
+        []
+
 -}
 input : Theme -> Input -> List (Attribute msg) -> List (Html msg) -> Html msg
 input theme model =

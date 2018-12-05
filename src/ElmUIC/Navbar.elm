@@ -1,4 +1,24 @@
-module ElmUIC.Navbar exposing (Navbar, defaultNavbar, item, navbar, separator)
+module ElmUIC.Navbar exposing
+    ( Navbar
+    , defaultNavbar
+    , item
+    , separator
+    , navbar
+    )
+
+{-| A styled navbar
+
+@docs Navbar
+
+@docs defaultNavbar
+
+@docs item
+
+@docs separator
+
+@docs navbar
+
+-}
 
 import Css exposing (Color, alignItems, auto, backgroundColor, backgroundImage, bold, borderRadius, boxShadow5, center, color, displayFlex, flex, flex3, fontFamilies, fontSize, fontWeight, height, hex, int, linearGradient, margin2, padding2, pct, position, px, relative, rgb, rgba, stop, stop2, textShadow4, width, zIndex, zero)
 import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
@@ -35,6 +55,8 @@ lighten color amount =
     rgb r g b
 
 
+{-| Base model for a navbar
+-}
 type alias Navbar =
     { kind : ColorSetting
     , size : Size
@@ -43,6 +65,11 @@ type alias Navbar =
     }
 
 
+{-| Instantiates the default properties of a nav
+
+    { defaultNavbar | title = "Hello, world!" }
+
+-}
 defaultNavbar : Navbar
 defaultNavbar =
     { kind = Primary
@@ -70,6 +97,11 @@ title =
         ]
 
 
+{-| An inidivual item in the navbar
+
+    item defaultTheme [] [ text "Click me!" ]
+
+-}
 item : Theme -> List (Attribute msg) -> List (Html msg) -> Html msg
 item theme =
     styled Styled.div
@@ -81,6 +113,13 @@ item theme =
         ]
 
 
+{-| A vertical separator to place between items
+
+    item defaultTheme [] [ text "One!" ]
+            , separator defaultTheme [] []
+            , item defaultTheme [] [ text "Two!" ]
+
+-}
 separator : Theme -> List (Attribute msg) -> List (Html msg) -> Html msg
 separator theme =
     styled Styled.div
@@ -91,7 +130,18 @@ separator theme =
         ]
 
 
-{-| A styled navbar
+{-| A styled nav using items and separators
+
+    navbar defaultTheme
+        { defaultNavbar | title = "Hello, WORLD" }
+        [ css [ width (px 600) ] ]
+        [ item defaultTheme [] [ text "One" ]
+        , separator defaultTheme [] []
+        , item defaultTheme [] [ text "Two" ]
+        , separator defaultTheme [] []
+        , item defaultTheme [] [ text "Three" ]
+        ]
+
 -}
 navbar : Theme -> Navbar -> List (Attribute msg) -> List (Html msg) -> Html msg
 navbar theme model attr inner =

@@ -1,4 +1,18 @@
-module ElmUIC.Modal exposing (Modal, defaultModal, modal)
+module ElmUIC.Modal exposing
+    ( Modal
+    , defaultModal
+    , modal
+    )
+
+{-| A styled full page Modal
+
+@docs Modal
+
+@docs defaultModal
+
+@docs modal
+
+-}
 
 import Css exposing (Color, absolute, backgroundColor, block, borderRadius, bottom, color, display, fixed, fontFamilies, fontSize, height, hex, int, left, minHeight, minWidth, none, num, opacity, padding2, pct, position, px, relative, rgba, right, top, transforms, translateX, translateY, vh, vw, width, zIndex, zero)
 import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
@@ -17,6 +31,8 @@ alwaysPreventDefault msg =
     ( msg, True )
 
 
+{-| Base model for a Modal
+-}
 type alias Modal =
     { kind : ColorSetting
     , size : Size
@@ -26,6 +42,11 @@ type alias Modal =
     }
 
 
+{-| Instantiates the default properties of a modal
+
+    { defaultModal | open = True }
+
+-}
 defaultModal : Modal
 defaultModal =
     { kind = Primary
@@ -55,6 +76,23 @@ modalContent theme model =
         ]
 
 
+{-| A styled modal
+
+    modal
+        defaultTheme
+        { defaultModal
+            | open = model.modalOpen
+        }
+        ToggleModal
+        [ css [ width (px 400), height (px 400) ] ]
+        [ button
+            defaultTheme
+            defaultButton
+            [ onClick <| ToggleModal False ]
+            [ text "Close it!" ]
+        ]
+
+-}
 modal : Theme -> Modal -> (Bool -> msg) -> List (Attribute msg) -> List (Html msg) -> Html msg
 modal theme model msg attr inner =
     let

@@ -181,7 +181,7 @@ navbar theme model attr inner =
 
         titleAttrs =
             if model.redirectHome then
-                [ href "" ]
+                [ href "/" ]
 
             else
                 []

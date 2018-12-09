@@ -20,7 +20,7 @@ module ElmUIC.Navbar exposing
 
 -}
 
-import Css exposing (Color, alignItems, auto, backgroundColor, backgroundImage, bold, borderRadius, boxShadow5, center, color, displayFlex, flex, flex3, fontFamilies, fontSize, fontWeight, height, hex, int, linearGradient, margin2, padding2, pct, position, px, relative, rgb, rgba, stop, stop2, textShadow4, width, zIndex, zero)
+import Css exposing (Color, alignItems, auto, backgroundColor, backgroundImage, bold, borderRadius, boxShadow5, center, color, displayFlex, flex, flex3, fontFamilies, fontSize, fontWeight, height, hex, int, linearGradient, margin2, none, padding2, pct, position, px, relative, rgb, rgba, stop, stop2, textDecoration, textShadow4, width, zIndex, zero)
 import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled, text)
 
@@ -110,6 +110,7 @@ item theme =
         , margin2 zero (px 2)
         , fontSize (px 18)
         , fontWeight bold
+        , textDecoration none
         ]
 
 

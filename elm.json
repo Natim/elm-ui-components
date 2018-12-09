@@ -3,7 +3,7 @@
     "name": "nathanjohnson320/elm-ui-components",
     "summary": "A set of reusable UI elements",
     "license": "MIT",
-    "version": "1.0.2",
+    "version": "2.0.0",
     "exposed-modules": [
         "ElmUIC.Button",
         "ElmUIC.Checkbox",

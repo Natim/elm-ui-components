@@ -23,6 +23,7 @@ module ElmUIC.Navbar exposing
 import Css exposing (Color, alignItems, auto, backgroundColor, backgroundImage, bold, borderRadius, boxShadow5, center, color, displayFlex, flex, flex3, fontFamilies, fontSize, fontWeight, height, hex, int, linearGradient, margin2, none, padding2, pct, position, px, relative, rgb, rgba, stop, stop2, textDecoration, textShadow4, width, zIndex, zero)
 import ElmUIC.Theme exposing (ColorSetting(..), Size(..), Theme)
 import Html.Styled as Styled exposing (Attribute, Html, styled, text)
+import Html.Styled.Attributes exposing (href)
 
 
 lighten : Color -> Float -> Color
@@ -62,6 +63,7 @@ type alias Navbar =
     , size : Size
     , text : Color
     , title : String
+    , redirectHome : Bool
     }
 
 
@@ -76,6 +78,7 @@ defaultNavbar =
     , size = Medium
     , text = hex "#FFF"
     , title = ""
+    , redirectHome = False
     }
 
 
@@ -88,12 +91,13 @@ spacer =
 
 title : List (Attribute msg) -> List (Html msg) -> Html msg
 title =
-    styled Styled.div
+    styled Styled.a
         [ textShadow4 zero (px 1) zero (rgba 0 0 0 0.3)
         , color (hex "#FFF")
         , margin2 zero (px 2)
         , fontSize (px 18)
         , fontWeight bold
+        , textDecoration none
         ]
 
 
@@ -174,6 +178,13 @@ navbar theme model attr inner =
 
                 Large ->
                     ( px 30, px 22, px 90 )
+
+        titleAttrs =
+            if model.redirectHome then
+                [ href "" ]
+
+            else
+                []
     in
     styled Styled.div
         [ color model.text
@@ -189,7 +200,7 @@ navbar theme model attr inner =
         , boxShadow5 zero (px 2) (px 3) zero (rgba 0 0 0 0.1)
         ]
         attr
-        ([ title [] [ text model.title ]
+        ([ title titleAttrs [ text model.title ]
          , spacer [] []
          ]
             ++ inner

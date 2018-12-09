@@ -104,7 +104,7 @@ title =
 -}
 item : Theme -> List (Attribute msg) -> List (Html msg) -> Html msg
 item theme =
-    styled Styled.div
+    styled Styled.a
         [ textShadow4 zero (px 1) zero (rgba 0 0 0 0.3)
         , color (hex "#FFF")
         , margin2 zero (px 2)
